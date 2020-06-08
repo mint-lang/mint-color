@@ -1,0 +1,9 @@
+{
+  "name": "mint-color",
+  "source-directories": [
+    "source"
+  ],
+  "test-directories": [
+    "tests"
+  ]
+}
