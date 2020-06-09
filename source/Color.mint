@@ -6,6 +6,9 @@ enum Color {
   /* [HSV Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
   HSVA(Number, Number, Number, Number)
 
+  /* [HSL Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
+  HSLA(Number, Number, Number, Number)
+
   /* [HEX Color Representation](https://en.wikipedia.org/wiki/Web_colors) */
   HEX(String)
 }
@@ -115,6 +118,39 @@ module Color {
   }
 
   /*
+  Sets the lightness to the given value of the given color.
+
+    color =
+      Color.fromHSLA(0, 100, 100, 100)
+
+    Color.setLightness(50, color) == Color.fromHSLA(0, 100, 50, 100)
+  */
+  fun setLightness (lightness : Number, color : Color) : Color {
+    case (color) {
+      Color::HSLA hue saturation oldLightness alpha => Color::HSLA(hue, saturation, Math.clamp(0, 100, lightness), alpha)
+
+      =>
+        color
+        |> toHSLA
+        |> setValue(lightness)
+    }
+  }
+
+  fun lighten (ratio : Number, color : Color) : Color {
+    case (color) {
+      Color::HSLA hue saturation lightness alpha =>
+        try {
+          Color::HSLA(hue, saturation, Math.clamp(0, 100, lightness + lightness * ratio), alpha)
+        }
+
+      =>
+        color
+        |> toHSLA
+        |> lighten(ratio)
+    }
+  }
+
+  /*
   Converts the given color to the CSS RGBA represenation.
 
     color =
@@ -183,13 +219,68 @@ module Color {
   */
   fun toHEX (color : Color) : Color {
     case (color) {
-      Color::HEX => color
       Color::RGBA red green blue alpha => Color::HEX(`##{red}.toString(16) + #{green}.toString(16) + #{blue}.toString(16) + #{alpha}.toString(16)`)
 
-      Color::HSVA =>
+      Color::HEX => color
+
+      =>
         color
         |> toRGBA
         |> toHEX
+    }
+  }
+
+  fun toRGBATuple (color : Color) : Tuple(Number, Number, Number, Number) {
+    case (color) {
+      Color::RGBA red green blue alpha => {red, green, blue, alpha}
+
+      =>
+        color
+        |> toRGBA
+        |> toRGBATuple
+    }
+  }
+
+  fun mix (weight : Number, color1 : Color, color2 : Color) : Color {
+    try {
+      {red1, green1, blue1, alpha1} =
+        Color.toRGBATuple(color1)
+
+      {red2, green2, blue2, alpha2} =
+        Color.toRGBATuple(color2)
+
+      a =
+        alpha1 - alpha2
+
+      w =
+        2 * weight - 1
+
+      wt =
+        if (w * a == -1) {
+          w
+        } else {
+          (w + a) / (1 + w * a)
+        }
+
+      w1 =
+        (wt + 1) / 2.0
+
+      w2 =
+        1 - w1
+
+      red =
+        w1 * red1 + w2 * red2
+
+      green =
+        w1 * green1 + w2 * green2
+
+      blue =
+        w1 * blue1 + w2 * blue2
+
+      alpha =
+        alpha1 * weight + alpha2 * (1 - weight)
+
+      Color::RGBA(red, green, blue, alpha)
     }
   }
 
@@ -216,6 +307,47 @@ module Color {
           return #{Color::RGBA(`red`, `green`, `blue`, `alpha`)}
         })()
         `
+
+      Color::HSLA hue saturation lightness alpha =>
+        try {
+          normalizedSaturation =
+            Math.clamp(0, 100, saturation) / 100
+
+          normalizedLightness =
+            Math.clamp(0, 100, lightness) / 100
+
+          normalizedAlpha =
+            Math.clamp(0, 100, alpha)
+
+          normalizedHue =
+            Math.clamp(0, 360, hue)
+
+          c =
+            (1 - Math.abs(2 * normalizedLightness - 1)) * normalizedSaturation
+
+          x =
+            c * (1 - Math.abs(Math.fmod(normalizedHue / 60, 2) - 1))
+
+          m =
+            normalizedLightness - c / 2
+
+          {red, green, blue} =
+            if (0 <= normalizedHue && normalizedHue < 60) {
+              {c, x, 0}
+            } else if (60 <= normalizedHue && normalizedHue < 120) {
+              {x, c, 0}
+            } else if (120 <= normalizedHue && normalizedHue < 180) {
+              {0, c, x}
+            } else if (180 <= normalizedHue && normalizedHue < 240) {
+              {0, x, c}
+            } else if (240 <= normalizedHue && normalizedHue < 300) {
+              {x, 0, c}
+            } else {
+              {c, 0, x}
+            }
+
+          Color::RGBA(Math.ceil((red + m) * 255), Math.ceil((green + m) * 255), Math.ceil((blue + m) * 255), normalizedAlpha)
+        }
 
       Color::HSVA hue saturation value alpha =>
         try {
@@ -260,6 +392,65 @@ module Color {
     }
   }
 
+  fun toHSLA (color : Color) : Color {
+    case (color) {
+      Color::RGBA red green blue alpha =>
+        try {
+          normalizedRed =
+            Math.clamp(0, 255, red) / 255
+
+          normalizedBlue =
+            Math.clamp(0, 255, blue) / 255
+
+          normalizedGreen =
+            Math.clamp(0, 255, green) / 255
+
+          cMax =
+            normalizedRed
+            |> Math.max(normalizedBlue)
+            |> Math.max(normalizedGreen)
+
+          cMin =
+            normalizedRed
+            |> Math.min(normalizedBlue)
+            |> Math.min(normalizedGreen)
+
+          delta =
+            cMax - cMin
+
+          lightness =
+            (cMax + cMin) / 2
+
+          saturation =
+            if (delta == 0) {
+              0
+            } else {
+              1 - Math.abs(2 * lightness - 1)
+            }
+
+          hue =
+            if (delta == 0) {
+              0
+            } else if (cMax == normalizedRed) {
+              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
+            } else if (cMax == normalizedBlue) {
+              60 * ((normalizedRed - normalizedGreen / delta) + 4)
+            } else {
+              60 * ((normalizedBlue - normalizedRed / delta) + 2)
+            }
+
+          Color::HSLA(Math.round(hue), Math.round(saturation * 100), Math.round(lightness * 100), Math.round(alpha))
+        }
+
+      Color::HSLA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSLA
+    }
+  }
+
   /*
   Converts the internal represenation of the color to HSVA.
 
@@ -270,13 +461,6 @@ module Color {
   */
   fun toHSVA (color : Color) : Color {
     case (color) {
-      Color::HSVA => color
-
-      Color::HEX =>
-        color
-        |> toRGBA
-        |> toHSVA
-
       Color::RGBA red green blue alpha =>
         try {
           normalizedRed =
@@ -324,6 +508,13 @@ module Color {
 
           Color::HSVA(Math.round(hue), Math.round(saturation * 100), Math.round(value * 100), Math.round(alpha))
         }
+
+      Color::HSVA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSVA
     }
   }
 }
