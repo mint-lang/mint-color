@@ -310,12 +310,11 @@ module Color {
       Color::HEX value =>
         `
         (() => {
-          const alpha = parseInt(#{value}.slice(6,8), 16) || 100
+          const alpha = parseInt(#{value}.slice(6,8), 16) || 255
           const green = parseInt(#{value}.slice(2,4), 16) || 0
           const blue = parseInt(#{value}.slice(4,6), 16) || 0
           const red = parseInt(#{value}.slice(0,2), 16) || 0
-
-          return #{Color::RGBA(`red`, `green`, `blue`, `alpha`)}
+          return #{Color::RGBA(`red`, `green`, `blue`, `alpha / 255 * 100`)}
         })()
         `
 
