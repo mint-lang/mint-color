@@ -213,9 +213,9 @@ module Color {
         getBrightness(color)
 
       if (brightness > 125) {
-        Color::RGBA(0, 0, 0, 100)
+        mix(0.1, color, Color::RGBA(0, 0, 0, 100))
       } else {
-        Color::RGBA(255, 255, 255, 100)
+        mix(0.025, color, Color::RGBA(255, 255, 255, 100))
       }
     }
   }
