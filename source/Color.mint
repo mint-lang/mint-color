@@ -117,6 +117,17 @@ module Color {
     }
   }
 
+  fun setAlpha (alpha : Number, color : Color) : Color {
+    case (color) {
+      Color::RGBA red green blue oldAlpha => Color::RGBA(red, green, blue, Math.clamp(0, 100, alpha))
+
+      =>
+        color
+        |> toRGBA
+        |> setAlpha(alpha)
+    }
+  }
+
   /*
   Sets the lightness to the given value of the given color.
 
