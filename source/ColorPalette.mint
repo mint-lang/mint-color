@@ -24,87 +24,62 @@ record ColorPalette {
 
 /* Functions for creating a color palette. */
 module ColorPalette {
+  /*
+  Returns a `ColorPalette.Shade` from a color, by calulating the
+  readable text color for that color.
+  */
+  fun shadeFromColor (color : Color) : ColorPalette.Shade {
+    {
+      text = Color.toCSSRGBA(Color.readableTextColor(color)),
+      color = Color.toCSSRGBA(color)
+    }
+  }
+
   /* Creates a color palette from the given color. */
-  fun fromColor (color : Color) : ColorPalette {
+  fun fromColor (
+    color : Color,
+    background : Color,
+    backgroundInverse : Color
+  ) : ColorPalette {
     try {
       s50 =
-        Color.mix(0.15, color, Color::HEX("FFFFFFFF"))
+        Color.mix(0.15, color, background)
 
       s100 =
-        Color.mix(0.3, color, Color::HEX("FFFFFFFF"))
+        Color.mix(0.3, color, background)
 
       s200 =
-        Color.mix(0.5, color, Color::HEX("FFFFFFFF"))
+        Color.mix(0.5, color, background)
 
       s300 =
-        Color.mix(0.7, color, Color::HEX("FFFFFFFF"))
+        Color.mix(0.7, color, background)
 
       s400 =
-        Color.mix(0.85, color, Color::HEX("FFFFFFFF"))
+        Color.mix(0.85, color, background)
 
       s600 =
-        Color.mix(0.85, color, Color::HEX("000000FF"))
+        Color.mix(0.85, color, backgroundInverse)
 
       s700 =
-        Color.mix(0.7, color, Color::HEX("000000FF"))
+        Color.mix(0.7, color, backgroundInverse)
 
       s800 =
-        Color.mix(0.5, color, Color::HEX("000000FF"))
+        Color.mix(0.5, color, backgroundInverse)
 
       s900 =
-        Color.mix(0.35, color, Color::HEX("000000FF"))
+        Color.mix(0.35, color, backgroundInverse)
 
       {
-        s900 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s900)),
-            color = Color.toCSSRGBA(s900)
-          },
-        s800 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s800)),
-            color = Color.toCSSRGBA(s800)
-          },
-        s700 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s700)),
-            color = Color.toCSSRGBA(s700)
-          },
-        s600 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s600)),
-            color = Color.toCSSRGBA(s600)
-          },
-        s500 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(color)),
-            color = Color.toCSSRGBA(color)
-          },
-        s400 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s400)),
-            color = Color.toCSSRGBA(s400)
-          },
-        s300 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s300)),
-            color = Color.toCSSRGBA(s300)
-          },
-        s200 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s200)),
-            color = Color.toCSSRGBA(s200)
-          },
-        s100 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s100)),
-            color = Color.toCSSRGBA(s100)
-          },
-        s50 =
-          {
-            text = Color.toCSSRGBA(Color.readableTextColor(s50)),
-            color = Color.toCSSRGBA(s50)
-          },
+        s900 = shadeFromColor(s900),
+        s800 = shadeFromColor(s800),
+        s700 = shadeFromColor(s700),
+        s600 = shadeFromColor(s600),
+        s500 = shadeFromColor(color),
+        s400 = shadeFromColor(s400),
+        s300 = shadeFromColor(s300),
+        s200 = shadeFromColor(s200),
+        s100 = shadeFromColor(s100),
+        s50 = shadeFromColor(s50),
         shadow = Color.toCSSRGBA(Color.setAlpha(25, color))
       }
     }
