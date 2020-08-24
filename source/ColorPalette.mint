@@ -19,7 +19,9 @@ record ColorPalette {
   s200 : ColorPalette.Shade,
   s100 : ColorPalette.Shade,
   s50 : ColorPalette.Shade,
-  shadow : String
+  saturation : Number,
+  lightness : Number,
+  hue : Number
 }
 
 /* Functions for creating a color palette. */
@@ -42,6 +44,9 @@ module ColorPalette {
     backgroundInverse : Color
   ) : ColorPalette {
     try {
+      {hue, saturation, lightness} =
+        Color.toHSLATuple(color)
+
       s50 =
         Color.mix(0.15, color, background)
 
@@ -80,7 +85,9 @@ module ColorPalette {
         s200 = shadeFromColor(s200),
         s100 = shadeFromColor(s100),
         s50 = shadeFromColor(s50),
-        shadow = Color.toCSSRGBA(Color.setAlpha(25, color))
+        saturation = saturation,
+        lightness = lightness,
+        hue = hue
       }
     }
   }

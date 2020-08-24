@@ -209,6 +209,6 @@ suite "Color.fromHEX" {
 suite "Color.readableTextColor" {
   test "returns white for black" {
     (Color.fromRGBA(0, 0, 0, 100)
-    |> Color.readableTextColor()) == Color::RGBA(248.625, 248.625, 248.625, 100)
+    |> Color.readableTextColor()) == Color::RGBA(242.25, 242.25, 242.25, 100)
   }
 }
