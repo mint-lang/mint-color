@@ -66,8 +66,7 @@ module Color {
       Math.clamp(0, 255, red),
       Math.clamp(0, 255, green),
       Math.clamp(0, 255, blue),
-      Math.clamp(0, 100, alpha)
-    )
+      Math.clamp(0, 100, alpha))
   }
 
   /*
@@ -85,8 +84,7 @@ module Color {
       Math.clamp(0, 360, hue),
       Math.clamp(0, 100, saturation),
       Math.clamp(0, 100, value),
-      Math.clamp(0, 100, alpha)
-    )
+      Math.clamp(0, 100, alpha))
   }
 
   /*
@@ -434,8 +432,7 @@ module Color {
             Math.ceil((red + m) * 255),
             Math.ceil((green + m) * 255),
             Math.ceil((blue + m) * 255),
-            normalizedAlpha
-          )
+            normalizedAlpha)
         }
 
       Color::HSVA hue saturation value alpha =>
@@ -480,8 +477,7 @@ module Color {
             Math.ceil((red + m) * 255),
             Math.ceil((green + m) * 255),
             Math.ceil((blue + m) * 255),
-            normalizedAlpha
-          )
+            normalizedAlpha)
         }
     }
   }
@@ -545,8 +541,7 @@ module Color {
             Math.round(hue),
             Math.round(saturation * 100),
             Math.round(lightness * 100),
-            Math.round(alpha)
-          )
+            Math.round(alpha))
         }
 
       Color::HSLA => color
@@ -617,8 +612,7 @@ module Color {
             Math.round(hue),
             Math.round(saturation * 100),
             Math.round(value * 100),
-            Math.round(alpha)
-          )
+            Math.round(alpha))
         }
 
       Color::HSVA => color
