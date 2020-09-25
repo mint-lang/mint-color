@@ -204,6 +204,14 @@ suite "Color.fromHEX" {
   test "handles 8 character colors without hashtag" {
     Color.fromHEX("00FFCCDD") == Maybe::Just(Color::HEX("00FFCCDD"))
   }
+
+  test "handles 8 character colors lowercase" {
+    Color.fromHEX("#00ffccdd") == Maybe::Just(Color::HEX("00FFCCDD"))
+  }
+
+  test "returns nothing for invalid input" {
+    Color.fromHEX("#00f!ccdd") == Maybe::Nothing
+  }
 }
 
 suite "Color.readableTextColor" {
