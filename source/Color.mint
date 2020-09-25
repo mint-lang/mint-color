@@ -156,14 +156,22 @@ module Color {
     }
   }
 
+  /*
+  Sets the alpha to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setAlpha(50, color) == Color.fromHSVA(0, 100, 100, 50)
+  */
   fun setAlpha (alpha : Number, color : Color) : Color {
     case (color) {
-      Color::RGBA red green blue oldAlpha =>
-        Color::RGBA(red, green, blue, Math.clamp(0, 100, alpha))
+      Color::HSVA hue staturation value oldAlpha =>
+        Color::HSVA(hue, staturation, value, Math.clamp(0, 100, alpha))
 
       =>
         color
-        |> toRGBA
+        |> toHSVA
         |> setAlpha(alpha)
     }
   }
