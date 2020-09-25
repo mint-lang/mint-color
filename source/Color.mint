@@ -117,6 +117,26 @@ module Color {
   }
 
   /*
+  Sets the hue to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setHue(50, color) == Color.fromHSVA(50, 100, 100, 100)
+  */
+  fun setHue (hue : Number, color : Color) : Color {
+    case (color) {
+      Color::HSVA oldHue saturation value alpha =>
+        Color::HSVA(Math.clamp(0, hue, 360), saturation, value, alpha)
+
+      =>
+        color
+        |> toHSVA
+        |> setHue(hue)
+    }
+  }
+
+  /*
   Sets the value to the given value of the given color.
 
     color =
@@ -168,6 +188,14 @@ module Color {
     }
   }
 
+  /*
+  Makes the color lighter using the given ratio.
+
+    color =
+      Color.fromHSLA(0, 100, 10, 100)
+
+    Color.lighten(10, color) == Color.fromHSLA(0, 100, 100, 100)
+  */
   fun lighten (ratio : Number, color : Color) : Color {
     case (color) {
       Color::HSLA hue saturation lightness alpha =>
@@ -202,6 +230,93 @@ module Color {
         color
         |> toRGBA
         |> toCSSRGBA
+    }
+  }
+
+  /*
+  Converts the given color to the CSS HEX represenation.
+
+    color =
+      Color.fromHex("#FFF")
+
+    Color.toCSSHex(color) == "#FFFFFFFF"
+  */
+  fun toCSSHex (color : Color) : String {
+    case (color) {
+      Color::HEX value => "##{value}"
+
+      =>
+        color
+        |> toHEX
+        |> toCSSHex
+    }
+  }
+
+  /*
+  Returns the alpha value of the color.
+
+    Color.getAlpha(Color.fromHSVA(0,100,100,50)) == 50
+  */
+  fun getAlpha (color : Color) : Number {
+    case (color) {
+      Color::HSVA red green blue alpha =>
+        alpha
+
+      =>
+        color
+        |> toHSVA
+        |> getAlpha
+    }
+  }
+
+  /*
+  Returns the hue of the color.
+
+    Color.getHue(Color.fromHSVA(0,100,100,50)) == 0
+  */
+  fun getHue (color : Color) : Number {
+    case (color) {
+      Color::HSVA hue =>
+        hue
+
+      =>
+        color
+        |> toHSVA
+        |> getHue
+    }
+  }
+
+  /*
+  Returns the saturation of the color.
+
+    Color.getSaturation(Color.fromHSVA(0,100,100,50)) == 100
+  */
+  fun getSaturation (color : Color) : Number {
+    case (color) {
+      Color::HSVA hue saturation =>
+        saturation
+
+      =>
+        color
+        |> toHSVA
+        |> getSaturation
+    }
+  }
+
+  /*
+  Returns the value of the color.
+
+    Color.getValue(Color.fromHSVA(0,100,100,50)) == 100
+  */
+  fun getValue (color : Color) : Number {
+    case (color) {
+      Color::HSVA hue saturation value =>
+        value
+
+      =>
+        color
+        |> toHSVA
+        |> getValue
     }
   }
 
@@ -492,7 +607,7 @@ module Color {
   }
 
   /*
-  Converts the internal represenation of the color to RGBA.
+  Converts the internal represenation of the color to HSLA.
 
     color =
       Color.fromRGBA(255, 255, 255, 100)
