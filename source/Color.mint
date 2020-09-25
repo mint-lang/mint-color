@@ -15,40 +15,49 @@ enum Color {
 
 /* Functions to create and manipulate colors. */
 module Color {
+  const HEX_REGEXP = Regexp.create("^[0-9A-Fa-f]+$")
+
   /*
-  Creates a color from a HEX part.
+  Creates a color from a HEX string.
 
     Color.fromHEX("#FFF")
     Color.fromHEX("#FFFFFF")
     Color.fromHEX("#FFFFFFFF")
   */
   fun fromHEX (value : String) : Maybe(Color) {
-    `
-    (() => {
+    try {
+      normalized =
+        value
+        |> String.replace("#", "")
+        |> String.toUpperCase()
 
-      if (/(^#)?[0-9A-F]{3}$/i.test(#{value}) ||
-          /(^#)?[0-9A-F]{6}$/i.test(#{value}) ||
-          /(^#)?[0-9A-F]{8}$/i.test(#{value})) {
-        const normalized = #{value}.replace(/^#/, '');
-        let parsed = 'FFFFFFFF';
+      if (Regexp.match(normalized, HEX_REGEXP)) {
+        case (String.size(normalized)) {
+          3 =>
+            try {
+              splitted =
+                String.split("", normalized)
 
-        if (normalized.length == 3) {
-          const [r, g, b] = normalized.split('')
+              red =
+                Maybe.withDefault("", splitted[0])
 
-          parsed = r + r + g + g + b + b + 'FF'
-        } else if (normalized.length == 6) {
-          parsed = normalized + 'FF'
-        } else if (normalized.length == 8) {
-          parsed = normalized
+              green =
+                Maybe.withDefault("", splitted[0])
+
+              blue =
+                Maybe.withDefault("", splitted[0])
+
+              Maybe::Just(Color::HEX("#{red}#{red}#{green}#{green}#{blue}#{blue}FF"))
+            }
+
+          6 => Maybe::Just(Color::HEX(normalized + "FF"))
+          8 => Maybe::Just(Color::HEX(normalized))
+          => Maybe::Nothing
         }
-
-        return #{Maybe::Just(Color::HEX(`parsed`))}
       } else {
-        #{Maybe::Nothing}
+        Maybe::Nothing
       }
-
-    })()
-    `
+    }
   }
 
   /*
