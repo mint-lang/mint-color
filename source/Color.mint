@@ -106,7 +106,7 @@ module Color {
   */
   fun setSaturation (saturation : Number, color : Color) : Color {
     case (color) {
-      Color::HSVA hue oldSaturation value alpha =>
+      Color::HSVA(hue, oldSaturation, value, alpha) =>
         Color::HSVA(hue, Math.clamp(0, 100, saturation), value, alpha)
 
       =>
@@ -126,7 +126,7 @@ module Color {
   */
   fun setHue (hue : Number, color : Color) : Color {
     case (color) {
-      Color::HSVA oldHue saturation value alpha =>
+      Color::HSVA(oldHue, saturation, value, alpha) =>
         Color::HSVA(Math.clamp(0, hue, 360), saturation, value, alpha)
 
       =>
@@ -146,7 +146,7 @@ module Color {
   */
   fun setValue (value : Number, color : Color) : Color {
     case (color) {
-      Color::HSVA hue saturation oldValue alpha =>
+      Color::HSVA(hue, saturation, oldValue, alpha) =>
         Color::HSVA(hue, saturation, Math.clamp(0, 100, value), alpha)
 
       =>
@@ -166,7 +166,7 @@ module Color {
   */
   fun setAlpha (alpha : Number, color : Color) : Color {
     case (color) {
-      Color::HSVA hue staturation value oldAlpha =>
+      Color::HSVA(hue, staturation, value, oldAlpha) =>
         Color::HSVA(hue, staturation, value, Math.clamp(0, 100, alpha))
 
       =>
@@ -186,7 +186,7 @@ module Color {
   */
   fun setLightness (lightness : Number, color : Color) : Color {
     case (color) {
-      Color::HSLA hue saturation oldLightness alpha =>
+      Color::HSLA(hue, saturation, oldLightness, alpha) =>
         Color::HSLA(hue, saturation, Math.clamp(0, 100, lightness), alpha)
 
       =>
@@ -206,7 +206,7 @@ module Color {
   */
   fun lighten (ratio : Number, color : Color) : Color {
     case (color) {
-      Color::HSLA hue saturation lightness alpha =>
+      Color::HSLA(hue, saturation, lightness, alpha) =>
         try {
           newLightness =
             Math.clamp(0, 100, lightness + lightness * ratio)
@@ -231,7 +231,7 @@ module Color {
   */
   fun toCSSRGBA (color : Color) : String {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         "rgba(#{red}, #{green}, #{blue}, #{alpha / 100})"
 
       =>
@@ -251,7 +251,7 @@ module Color {
   */
   fun toCSSHex (color : Color) : String {
     case (color) {
-      Color::HEX value => "##{value}"
+      Color::HEX(value) => "##{value}"
 
       =>
         color
@@ -267,7 +267,7 @@ module Color {
   */
   fun getAlpha (color : Color) : Number {
     case (color) {
-      Color::HSVA red green blue alpha =>
+      Color::HSVA(red, green, blue, alpha) =>
         alpha
 
       =>
@@ -284,7 +284,7 @@ module Color {
   */
   fun getHue (color : Color) : Number {
     case (color) {
-      Color::HSVA hue =>
+      Color::HSVA(hue) =>
         hue
 
       =>
@@ -301,7 +301,7 @@ module Color {
   */
   fun getSaturation (color : Color) : Number {
     case (color) {
-      Color::HSVA hue saturation =>
+      Color::HSVA(hue, saturation) =>
         saturation
 
       =>
@@ -318,7 +318,7 @@ module Color {
   */
   fun getValue (color : Color) : Number {
     case (color) {
-      Color::HSVA hue saturation value =>
+      Color::HSVA(hue, saturation, value) =>
         value
 
       =>
@@ -337,7 +337,7 @@ module Color {
   */
   fun getBrightness (color : Color) : Number {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         Math.round((red * 299 + green * 587 + blue * 114) / 1000)
 
       =>
@@ -379,7 +379,7 @@ module Color {
   */
   fun toHEX (color : Color) : Color {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         try {
           redPart =
             `#{red}.toString(16).padStart(2,'0')`
@@ -415,7 +415,7 @@ module Color {
   */
   fun toRGBATuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         {red, green, blue, alpha}
 
       =>
@@ -435,7 +435,7 @@ module Color {
   */
   fun toHSLATuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
-      Color::HSLA hue saturation lightness alpha =>
+      Color::HSLA(hue, saturation, lightness, alpha) =>
         {hue, saturation, lightness, alpha}
 
       =>
@@ -511,7 +511,7 @@ module Color {
     case (color) {
       Color::RGBA => color
 
-      Color::HEX value =>
+      Color::HEX(value) =>
         `
         (() => {
           const alpha = parseInt(#{value}.slice(6,8), 16) || 255
@@ -522,7 +522,7 @@ module Color {
         })()
         `
 
-      Color::HSLA hue saturation lightness alpha =>
+      Color::HSLA(hue, saturation, lightness, alpha) =>
         try {
           normalizedSaturation =
             Math.clamp(0, 100, saturation) / 100
@@ -567,7 +567,7 @@ module Color {
             normalizedAlpha)
         }
 
-      Color::HSVA hue saturation value alpha =>
+      Color::HSVA(hue, saturation, value, alpha) =>
         try {
           normalizedSaturation =
             Math.clamp(0, 100, saturation) / 100
@@ -624,7 +624,7 @@ module Color {
   */
   fun toHSLA (color : Color) : Color {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         try {
           normalizedRed =
             Math.clamp(0, 255, red) / 255
@@ -695,7 +695,7 @@ module Color {
   */
   fun toHSVA (color : Color) : Color {
     case (color) {
-      Color::RGBA red green blue alpha =>
+      Color::RGBA(red, green, blue, alpha) =>
         try {
           normalizedRed =
             Math.clamp(0, 255, red) / 255
