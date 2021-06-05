@@ -42,10 +42,10 @@ module Color {
                 Maybe.withDefault("", splitted[0])
 
               green =
-                Maybe.withDefault("", splitted[0])
+                Maybe.withDefault("", splitted[1])
 
               blue =
-                Maybe.withDefault("", splitted[0])
+                Maybe.withDefault("", splitted[2])
 
               Maybe::Just(Color::HEX("#{red}#{red}#{green}#{green}#{blue}#{blue}FF"))
             }
