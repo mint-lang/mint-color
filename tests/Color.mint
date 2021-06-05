@@ -181,8 +181,12 @@ suite "Color.fromRGBA" {
 }
 
 suite "Color.fromHEX" {
-  test "handles 3 character colors" {
+  test "handles 3 character colors (all same)" {
     Color.fromHEX("#000") == Maybe::Just(Color::HEX("000000FF"))
+  }
+
+  test "handles 3 character colors (all different)" {
+    Color.fromHEX("#FCD") == Maybe::Just(Color::HEX("FFCCDDFF"))
   }
 
   test "handles 6 character colors" {
