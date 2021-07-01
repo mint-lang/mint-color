@@ -408,10 +408,10 @@ module Color {
   /*
   Returns the given color as an RGBA tuple.
 
-  color =
+    color =
       Color.fromRGBA(255, 255, 255, 100)
 
-  Color.toRGBATuple(color) == {255,255,255,100}
+    Color.toRGBATuple(color) == {255,255,255,100}
   */
   fun toRGBATuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
@@ -428,10 +428,10 @@ module Color {
   /*
   Returns the given color as a HSLA tuple.
 
-  color =
+    color =
       Color.fromRGBA(255, 255, 255, 100)
 
-  Color.toHSLATuple(color) == {255,255,255,100}
+    Color.toHSLATuple(color) == {255,255,255,100}
   */
   fun toHSLATuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
@@ -448,13 +448,13 @@ module Color {
   /*
   Mixes two given colors using the given weight (0-1).
 
-  color1 =
-    Color.fromRGBA(255, 255, 255, 100)
+    color1 =
+      Color.fromRGBA(255, 255, 255, 100)
 
-  color2 =
-    Color.fromRGBA(0, 0, 0, 100)
+    color2 =
+      Color.fromRGBA(0, 0, 0, 100)
 
-  Color.mix(0.5, color1, color2) == Color.fromRGBA(128, 128, 128, 100)
+    Color.mix(0.5, color1, color2) == Color.fromRGBA(128, 128, 128, 100)
   */
   fun mix (weight : Number, color1 : Color, color2 : Color) : Color {
     try {
