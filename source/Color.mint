@@ -222,7 +222,7 @@ module Color {
   }
 
   /*
-  Converts the given color to the CSS RGBA represenation.
+  Converts the given color to the CSS RGBA representation.
 
     color =
       Color.fromRGBA(255, 255, 255, 100)
@@ -242,7 +242,7 @@ module Color {
   }
 
   /*
-  Converts the given color to the CSS HEX represenation.
+  Converts the given color to the CSS HEX representation.
 
     color =
       Color.fromHex("#FFF")
@@ -370,7 +370,7 @@ module Color {
   }
 
   /*
-  Converts the internal represenation of the color to HEX.
+  Converts the internal representation of the color to HEX.
 
     color =
       Color.fromHSVA(0, 100, 100, 100)
@@ -500,7 +500,7 @@ module Color {
   }
 
   /*
-  Converts the internal represenation of the color to RGBA.
+  Converts the internal representation of the color to RGBA.
 
     color =
       Color.fromHSVA(0, 100, 100, 100)
@@ -615,7 +615,7 @@ module Color {
   }
 
   /*
-  Converts the internal represenation of the color to HSLA.
+  Converts the internal representation of the color to HSLA.
 
     color =
       Color.fromRGBA(255, 255, 255, 100)
@@ -686,7 +686,7 @@ module Color {
   }
 
   /*
-  Converts the internal represenation of the color to HSVA.
+  Converts the internal representation of the color to HSVA.
 
     color =
       Color.fromRGBA(255, 255, 255, 100)
