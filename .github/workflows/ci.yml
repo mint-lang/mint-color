@@ -17,7 +17,7 @@ jobs:
     - name: Setup Mint
       uses: fabasoad/setup-mint-action@v1.0.15
       with:
-        version: 0.14.0
+        version: 0.15.3
 
     - name: Run script
       run: mint test
