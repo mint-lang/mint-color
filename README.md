@@ -1,5 +1,4 @@
-# mint-color
-![CI](https://github.com/mint-lang/mint-color/workflows/CI/badge.svg?branch=master)
+# mint-color ![CI](https://github.com/mint-lang/mint-color/workflows/CI/badge.svg?branch=master)
 
 Create and manipulate colors in Mint.
 
@@ -42,13 +41,13 @@ The implementation is using an `enum` to represent a color. Current there are fo
 
 A color is created with one of the `fromXXX` functions, which will set their implementation accordingly:
 
-```
+```mint
 Color.fromHEX("FFFFFFFF") == Color::HEX("FFFFFFFF")
 ```
 
 Different functions will convert (when needed) the internal representation into a different color space, for example getting the `hue` of a `HEX` or `RGBA` color will convert it to `HSVA` first and return it's `hue`:
 
-```
+```mint
 Color.getHue(Color.fromHEX("#FF0000")) == 0
 ```
 
