@@ -9,6 +9,9 @@ enum Color {
   /* [HSL Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
   HSLA(Number, Number, Number, Number)
 
+  /* [HSI Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
+  HSIA(Number, Number, Number, Number)
+
   /* [HEX Color Representation](https://en.wikipedia.org/wiki/Web_colors) */
   HEX(String)
 }
@@ -522,6 +525,60 @@ module Color {
         })()
         `
 
+      Color::HSIA(hue, saturation, intensity, alpha) =>
+        try {
+          z =
+            (1 - saturation) / 3
+
+          x =
+            (value : Number) {
+              (1 + saturation * Math.cos(value) / Math.cos(60 - value)) / 3
+            }
+
+          {red, green, blue} =
+            if (hue < 0) {
+              {0, 0, 0}
+            } else if (hue <= 120) {
+              try {
+                blue =
+                  z
+
+                red =
+                  x(hue)
+
+                ({red, 1 - red - blue, blue})
+              }
+            } else if (hue <= 240) {
+              try {
+                green =
+                  x(hue - 120)
+
+                red =
+                  z
+
+                ({red, green, 1 - red - green})
+              }
+            } else if (hue <= 360) {
+              try {
+                blue =
+                  x(hue - 240)
+
+                green =
+                  z
+
+                ({1 - green - blue, green, blue})
+              }
+            } else {
+              {0, 0, 0}
+            }
+
+          Color::RGBA(
+            Math.round(intensity * red * 765 / 100),
+            Math.round(intensity * green * 765 / 100),
+            Math.round(intensity * blue * 765 / 100),
+            alpha)
+        }
+
       Color::HSLA(hue, saturation, lightness, alpha) =>
         try {
           normalizedSaturation =
@@ -754,5 +811,180 @@ module Color {
         |> toRGBA
         |> toHSVA
     }
+  }
+
+  /*
+  Converts the internal representation of the color to HSIA.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toHSIA(color) == Color.fromHSVA(0, 100, 100, 100)
+  */
+  fun toHSIA (color : Color) : Color {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        try {
+          normalizedRed =
+            Math.clamp(0, 255, red) / 255
+
+          normalizedBlue =
+            Math.clamp(0, 255, blue) / 255
+
+          normalizedGreen =
+            Math.clamp(0, 255, green) / 255
+
+          intensity =
+            (normalizedRed + normalizedGreen + normalizedBlue) / 3
+
+          if (normalizedRed == normalizedGreen &&
+              normalizedGreen == normalizedBlue) {
+            Color::HSIA(
+              Math.round(0),
+              Math.round(0),
+              Math.round(intensity * 100),
+              Math.round(alpha))
+          } else {
+            try {
+              w =
+                (normalizedRed - normalizedGreen + normalizedRed - normalizedBlue) / Math.sqrt(
+                  (normalizedRed - normalizedGreen) * (normalizedRed - normalizedGreen) +
+                    (normalizedRed - normalizedBlue) * (normalizedGreen - normalizedBlue)) / 2
+
+              hueBase =
+                Math.acos(w) * 180 / Math:PI
+
+              hue =
+                if (normalizedBlue > normalizedGreen) {
+                  360 - hueBase
+                } else {
+                  hueBase
+                }
+
+              saturation =
+                1 - (Array.min([normalizedRed, normalizedGreen, normalizedBlue]) or 0) / intensity
+
+              Color::HSIA(
+                Math.round(hue),
+                Math.round(saturation * 100),
+                Math.round(intensity * 100),
+                Math.round(alpha))
+            }
+          }
+        }
+
+      Color::HSIA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSIA
+    }
+  }
+
+  /* Generates a random color. */
+  fun random : Color {
+    `
+    (() => {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+
+      return #{Maybe.withDefault(Color::HEX("000000"), Color.fromHEX(`color`))};
+    })()
+    `
+  }
+
+  /*
+  Calculates the color contrast ratio between two colors (1 to 21).
+  https://www.w3.org/TR/2008/REC-WCAG20-20081211/#visual-audio-contrast-contrast
+  */
+  fun contrastRatio (background : Color, text : Color) : Number {
+    try {
+      color1 =
+        Color.relativeLuminance(text)
+
+      color2 =
+        Color.relativeLuminance(background)
+
+      ratio =
+        if (color1 > color2) {
+          (color1 + 0.05) / (color2 + 0.05)
+        } else {
+          (color2 + 0.05) / (color1 + 0.05)
+        }
+
+      Math.round(ratio * 100) / 100
+    }
+  }
+
+  /*
+  Calculates the relative luminance of a color.
+  https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+  */
+  fun relativeLuminance (color : Color) : Number {
+    try {
+      item =
+        Color.toRGBATuple(color)
+
+      normalize =
+        (value : Number) {
+          if (value <= 0.03928) {
+            value / 12.92
+          } else {
+            `Math.pow((#{value} + 0.055) / 1.055, 2.4)`
+          }
+        }
+
+      r =
+        normalize(item[0] / 255)
+
+      g =
+        normalize(item[1] / 255)
+
+      b =
+        normalize(item[2] / 255)
+
+      0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+  }
+
+  /* Generates a color from a string. */
+  fun colorOfString (value : String) : String {
+    `
+    (() => {
+      let h, s, l;
+
+      const opts = {
+        sat: [50, 100],
+        hue: [0, 360],
+        lit: [40, 75]
+      };
+
+      const range = function(hash, min, max) {
+        const diff = max - min;
+        const x = ((hash % diff) + diff) % diff;
+        return x + min;
+      }
+
+      let hash = 0;
+
+      if (#{value}.length === 0) return hash;
+
+      for (var i = 0; i < #{value}.length; i++) {
+        hash = #{value}.charCodeAt(i) + ((hash << 5) - hash);
+        hash = hash & hash;
+      }
+
+      h = range(hash, opts.hue[0], opts.hue[1]);
+      s = range(hash, opts.sat[0], opts.sat[1]);
+      l = range(hash, opts.lit[0], opts.lit[1]);
+
+      return \`hsl(${h}, ${s}%, ${l}%)\`;
+    })()
+    ` as String
   }
 }
