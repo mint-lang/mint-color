@@ -404,7 +404,7 @@ module Color {
   fun setAlpha (alpha : Number, color : Color) : Color {
     case (color) {
       Color::HSVA(hue, staturation, value, oldAlpha) =>
-        Color::HSVA(hue, staturation, value, Math.clamp(0, 100, alpha))
+        Color::HSVA(hue, staturation, value, Math.round(Math.clamp(0, 100, alpha)))
 
       =>
         color
@@ -424,7 +424,7 @@ module Color {
   fun setHue (hue : Number, color : Color) : Color {
     case (color) {
       Color::HSVA(oldHue, saturation, value, alpha) =>
-        Color::HSVA(Math.clamp(0, hue, 360), saturation, value, alpha)
+        Color::HSVA(Math.round(Math.clamp(0, hue, 360)), saturation, value, alpha)
 
       =>
         color
@@ -444,7 +444,7 @@ module Color {
   fun setLightness (lightness : Number, color : Color) : Color {
     case (color) {
       Color::HSLA(hue, saturation, oldLightness, alpha) =>
-        Color::HSLA(hue, saturation, Math.clamp(0, 100, lightness), alpha)
+        Color::HSLA(hue, saturation, Math.round(Math.clamp(0, 100, lightness)), alpha)
 
       =>
         color
@@ -464,7 +464,7 @@ module Color {
   fun setSaturation (saturation : Number, color : Color) : Color {
     case (color) {
       Color::HSVA(hue, oldSaturation, value, alpha) =>
-        Color::HSVA(hue, Math.clamp(0, 100, saturation), value, alpha)
+        Color::HSVA(hue, Math.round(Math.clamp(0, 100, saturation)), value, alpha)
 
       =>
         color
@@ -484,7 +484,7 @@ module Color {
   fun setValue (value : Number, color : Color) : Color {
     case (color) {
       Color::HSVA(hue, saturation, oldValue, alpha) =>
-        Color::HSVA(hue, saturation, Math.clamp(0, 100, value), alpha)
+        Color::HSVA(hue, saturation, Math.round(Math.clamp(0, 100, value)), alpha)
 
       =>
         color
