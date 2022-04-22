@@ -545,13 +545,13 @@ module Color {
       Color::RGBA(red, green, blue, alpha) =>
         try {
           redPart =
-            `#{red}.toString(16).padStart(2,'0')`
+            `#{Math.round(red)}.toString(16).padStart(2,'0')`
 
           greenPart =
-            `#{green}.toString(16).padStart(2,'0')`
+            `#{Math.round(green)}.toString(16).padStart(2,'0')`
 
           bluePart =
-            `#{blue}.toString(16).padStart(2,'0')`
+            `#{Math.round(blue)}.toString(16).padStart(2,'0')`
 
           alphaPart =
             `#{Math.round(alpha * 2.55)}.toString(16).padStart(2,'0')`
