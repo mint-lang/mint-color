@@ -990,4 +990,45 @@ module Color {
         |> toRGBATuple
     }
   }
+
+  /* Returns the CSS HSLA representation of the color. */
+  fun toCSSHSLA (color : Color) : String {
+    case (color) {
+      Color::HSLA(hue, saturation, lightness, alpha) =>
+        "hsla(#{hue}, #{saturation}%, #{lightness}%, #{Math.round(alpha / 100)})"
+
+      =>
+        color
+        |> toHSLA
+        |> toCSSHSLA
+    }
+  }
+
+  /* Returns the CSS Percent RGBA representation of the color. */
+  fun toCSSRGBAPercent (color : Color) : String {
+    try {
+      {red, green, blue, alpha} =
+        toRGBAPercentTuple(color)
+
+      "rgba(#{red}%, #{green}%, #{blue}%, #{alpha}%)"
+    }
+  }
+
+  /* Returns the the color as an Percent RGBA tuple (0..1). */
+  fun toRGBAPercentTuple (color : Color) : Tuple(Number, Number, Number, Number) {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        {
+          Math.round((red / 255) * 100),
+          Math.round((green / 255) * 100),
+          Math.round((blue / 255) * 100),
+          alpha
+        }
+
+      =>
+        color
+        |> toRGBA
+        |> toRGBAPercentTuple
+    }
+  }
 }
