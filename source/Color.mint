@@ -9,6 +9,9 @@ enum Color {
   /* [HSL Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
   HSLA(Number, Number, Number, Number)
 
+  /* [HSI Color Representation](https://en.wikipedia.org/wiki/HSL_and_HSV) */
+  HSIA(Number, Number, Number, Number)
+
   /* [HEX Color Representation](https://en.wikipedia.org/wiki/Web_colors) */
   HEX(String)
 }
@@ -16,6 +19,65 @@ enum Color {
 /* Functions to create and manipulate colors. */
 module Color {
   const HEX_REGEXP = Regexp.create("^[0-9A-Fa-f]+$")
+
+  /* Generates a color from a string. */
+  fun colorOfString (value : String) : String {
+    `
+    (() => {
+      let h, s, l;
+
+      const opts = {
+        sat: [50, 100],
+        hue: [0, 360],
+        lit: [40, 75]
+      };
+
+      const range = function(hash, min, max) {
+        const diff = max - min;
+        const x = ((hash % diff) + diff) % diff;
+        return x + min;
+      }
+
+      let hash = 0;
+
+      if (#{value}.length === 0) return hash;
+
+      for (var i = 0; i < #{value}.length; i++) {
+        hash = #{value}.charCodeAt(i) + ((hash << 5) - hash);
+        hash = hash & hash;
+      }
+
+      h = range(hash, opts.hue[0], opts.hue[1]);
+      s = range(hash, opts.sat[0], opts.sat[1]);
+      l = range(hash, opts.lit[0], opts.lit[1]);
+
+      return \`hsl(${h}, ${s}%, ${l}%)\`;
+    })()
+    ` as String
+  }
+
+  /*
+  Calculates the color contrast ratio between two colors (1 to 21).
+  https://www.w3.org/TR/2008/REC-WCAG20-20081211/#visual-audio-contrast-contrast
+  */
+  fun contrastRatio (background : Color, text : Color) : Number {
+    try {
+      color1 =
+        Color.relativeLuminance(text)
+
+      color2 =
+        Color.relativeLuminance(background)
+
+      ratio =
+        if (color1 > color2) {
+          (color1 + 0.05) / (color2 + 0.05)
+        } else {
+          (color2 + 0.05) / (color1 + 0.05)
+        }
+
+      Math.round(ratio * 100) / 100
+    }
+  }
 
   /*
   Creates a color from a HEX string.
@@ -61,24 +123,6 @@ module Color {
   }
 
   /*
-  Creates a color from red, green, blue and alpha parts.
-
-    Color.fromRGBA(255, 255, 255, 100)
-  */
-  fun fromRGBA (
-    red : Number,
-    green : Number,
-    blue : Number,
-    alpha : Number
-  ) : Color {
-    Color::RGBA(
-      Math.clamp(0, 255, red),
-      Math.clamp(0, 255, green),
-      Math.clamp(0, 255, blue),
-      Math.clamp(0, 100, alpha))
-  }
-
-  /*
   Creates a color from hue, saturation, value and alpha parts.
 
     Color.fromHSVA(0, 100, 100, 100)
@@ -97,167 +141,21 @@ module Color {
   }
 
   /*
-  Sets the saturation to the given value of the given color.
+  Creates a color from red, green, blue and alpha parts.
 
-    color =
-      Color.fromHSVA(0, 100, 100, 100)
-
-    Color.setSaturation(50, color) == Color.fromHSVA(0, 50, 100, 100)
+    Color.fromRGBA(255, 255, 255, 100)
   */
-  fun setSaturation (saturation : Number, color : Color) : Color {
-    case (color) {
-      Color::HSVA(hue, oldSaturation, value, alpha) =>
-        Color::HSVA(hue, Math.clamp(0, 100, saturation), value, alpha)
-
-      =>
-        color
-        |> toHSVA
-        |> setSaturation(saturation)
-    }
-  }
-
-  /*
-  Sets the hue to the given value of the given color.
-
-    color =
-      Color.fromHSVA(0, 100, 100, 100)
-
-    Color.setHue(50, color) == Color.fromHSVA(50, 100, 100, 100)
-  */
-  fun setHue (hue : Number, color : Color) : Color {
-    case (color) {
-      Color::HSVA(oldHue, saturation, value, alpha) =>
-        Color::HSVA(Math.clamp(0, hue, 360), saturation, value, alpha)
-
-      =>
-        color
-        |> toHSVA
-        |> setHue(hue)
-    }
-  }
-
-  /*
-  Sets the value to the given value of the given color.
-
-    color =
-      Color.fromHSVA(0, 100, 100, 100)
-
-    Color.setValue(50, color) == Color.fromHSVA(0, 100, 50, 100)
-  */
-  fun setValue (value : Number, color : Color) : Color {
-    case (color) {
-      Color::HSVA(hue, saturation, oldValue, alpha) =>
-        Color::HSVA(hue, saturation, Math.clamp(0, 100, value), alpha)
-
-      =>
-        color
-        |> toHSVA
-        |> setValue(value)
-    }
-  }
-
-  /*
-  Sets the alpha to the given value of the given color.
-
-    color =
-      Color.fromHSVA(0, 100, 100, 100)
-
-    Color.setAlpha(50, color) == Color.fromHSVA(0, 100, 100, 50)
-  */
-  fun setAlpha (alpha : Number, color : Color) : Color {
-    case (color) {
-      Color::HSVA(hue, staturation, value, oldAlpha) =>
-        Color::HSVA(hue, staturation, value, Math.clamp(0, 100, alpha))
-
-      =>
-        color
-        |> toHSVA
-        |> setAlpha(alpha)
-    }
-  }
-
-  /*
-  Sets the lightness to the given value of the given color.
-
-    color =
-      Color.fromHSLA(0, 100, 100, 100)
-
-    Color.setLightness(50, color) == Color.fromHSLA(0, 100, 50, 100)
-  */
-  fun setLightness (lightness : Number, color : Color) : Color {
-    case (color) {
-      Color::HSLA(hue, saturation, oldLightness, alpha) =>
-        Color::HSLA(hue, saturation, Math.clamp(0, 100, lightness), alpha)
-
-      =>
-        color
-        |> toHSLA
-        |> setValue(lightness)
-    }
-  }
-
-  /*
-  Makes the color lighter using the given ratio.
-
-    color =
-      Color.fromHSLA(0, 100, 10, 100)
-
-    Color.lighten(10, color) == Color.fromHSLA(0, 100, 100, 100)
-  */
-  fun lighten (ratio : Number, color : Color) : Color {
-    case (color) {
-      Color::HSLA(hue, saturation, lightness, alpha) =>
-        try {
-          newLightness =
-            Math.clamp(0, 100, lightness + lightness * ratio)
-
-          Color::HSLA(hue, saturation, newLightness, alpha)
-        }
-
-      =>
-        color
-        |> toHSLA
-        |> lighten(ratio)
-    }
-  }
-
-  /*
-  Converts the given color to the CSS RGBA representation.
-
-    color =
-      Color.fromRGBA(255, 255, 255, 100)
-
-    Color.toCSSRGBA(color) == "rgba(255,255,255,1)"
-  */
-  fun toCSSRGBA (color : Color) : String {
-    case (color) {
-      Color::RGBA(red, green, blue, alpha) =>
-        "rgba(#{red}, #{green}, #{blue}, #{alpha / 100})"
-
-      =>
-        color
-        |> toRGBA
-        |> toCSSRGBA
-    }
-  }
-
-  /*
-  Converts the given color to the CSS HEX representation.
-
-    color =
-      Color.fromHex("#FFF")
-
-    Color.toCSSHex(color) == "#FFFFFFFF"
-  */
-  fun toCSSHex (color : Color) : String {
-    case (color) {
-      Color::HEX(value) => "##{value}"
-
-      =>
-        color
-        |> toHEX
-        |> toCSSHex
-    }
+  fun fromRGBA (
+    red : Number,
+    green : Number,
+    blue : Number,
+    alpha : Number
+  ) : Color {
+    Color::RGBA(
+      Math.clamp(0, 255, red),
+      Math.clamp(0, 255, green),
+      Math.clamp(0, 255, blue),
+      Math.clamp(0, 100, alpha))
   }
 
   /*
@@ -274,6 +172,25 @@ module Color {
         color
         |> toHSVA
         |> getAlpha
+    }
+  }
+
+  /*
+  Returns the brightness of the given color base on the
+  [W3C formula](https://www.w3.org/TR/AERT/#color-contrast)
+
+    Color.getBrightness(Color.fromRGBA(255,255,255,100)) == 1000
+    Color.getBrightness(Color.fromRGBA(0,0,0,100)) == 0
+  */
+  fun getBrightness (color : Color) : Number {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        Math.round((red * 299 + green * 587 + blue * 114) / 1000)
+
+      =>
+        color
+        |> toRGBA
+        |> getBrightness
     }
   }
 
@@ -329,119 +246,27 @@ module Color {
   }
 
   /*
-  Returns the brightness of the given color base on the
-  [W3C formula](https://www.w3.org/TR/AERT/#color-contrast)
-
-    Color.getBrightness(Color.fromRGBA(255,255,255,100)) == 1000
-    Color.getBrightness(Color.fromRGBA(0,0,0,100)) == 0
-  */
-  fun getBrightness (color : Color) : Number {
-    case (color) {
-      Color::RGBA(red, green, blue, alpha) =>
-        Math.round((red * 299 + green * 587 + blue * 114) / 1000)
-
-      =>
-        color
-        |> toRGBA
-        |> getBrightness
-    }
-  }
-
-  /*
-  Returns the readable text color (white or black) based on
-  the brightness of the color.
+  Makes the color lighter using the given ratio.
 
     color =
-      Color.fromRGBA(255, 255, 255, 100)
+      Color.fromHSLA(0, 100, 10, 100)
 
-    Color.readableTextColor(color) == Color.fromRGBA(0, 0, 0, 100)
+    Color.lighten(10, color) == Color.fromHSLA(0, 100, 100, 100)
   */
-  fun readableTextColor (color : Color) : Color {
-    try {
-      brightness =
-        getBrightness(color)
-
-      if (brightness > 125) {
-        mix(0.1, color, Color::RGBA(0, 0, 0, 100))
-      } else {
-        mix(0.05, color, Color::RGBA(255, 255, 255, 100))
-      }
-    }
-  }
-
-  /*
-  Converts the internal representation of the color to HEX.
-
-    color =
-      Color.fromHSVA(0, 100, 100, 100)
-
-    Color.toHEX(color) == Color.fromHEX("#FFFFFFFF")
-  */
-  fun toHEX (color : Color) : Color {
-    case (color) {
-      Color::RGBA(red, green, blue, alpha) =>
-        try {
-          redPart =
-            `#{red}.toString(16).padStart(2,'0')`
-
-          greenPart =
-            `#{green}.toString(16).padStart(2,'0')`
-
-          bluePart =
-            `#{blue}.toString(16).padStart(2,'0')`
-
-          alphaPart =
-            `#{Math.round(alpha * 2.55)}.toString(16).padStart(2,'0')`
-
-          Color::HEX(String.toUpperCase("#{redPart}#{greenPart}#{bluePart}#{alphaPart}"))
-        }
-
-      Color::HEX => color
-
-      =>
-        color
-        |> toRGBA
-        |> toHEX
-    }
-  }
-
-  /*
-  Returns the given color as an RGBA tuple.
-
-    color =
-      Color.fromRGBA(255, 255, 255, 100)
-
-    Color.toRGBATuple(color) == {255,255,255,100}
-  */
-  fun toRGBATuple (color : Color) : Tuple(Number, Number, Number, Number) {
-    case (color) {
-      Color::RGBA(red, green, blue, alpha) =>
-        {red, green, blue, alpha}
-
-      =>
-        color
-        |> toRGBA
-        |> toRGBATuple
-    }
-  }
-
-  /*
-  Returns the given color as a HSLA tuple.
-
-    color =
-      Color.fromRGBA(255, 255, 255, 100)
-
-    Color.toHSLATuple(color) == {255,255,255,100}
-  */
-  fun toHSLATuple (color : Color) : Tuple(Number, Number, Number, Number) {
+  fun lighten (ratio : Number, color : Color) : Color {
     case (color) {
       Color::HSLA(hue, saturation, lightness, alpha) =>
-        {hue, saturation, lightness, alpha}
+        try {
+          newLightness =
+            Math.clamp(0, 100, lightness + lightness * ratio)
+
+          Color::HSLA(hue, saturation, newLightness, alpha)
+        }
 
       =>
         color
         |> toHSLA
-        |> toHSLATuple
+        |> lighten(ratio)
     }
   }
 
@@ -499,6 +324,485 @@ module Color {
     }
   }
 
+  /* Generates a random color. */
+  fun random : Color {
+    `
+    (() => {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+
+      return #{Maybe.withDefault(Color::HEX("000000"), Color.fromHEX(`color`))};
+    })()
+    `
+  }
+
+  /*
+  Returns the readable text color (white or black) based on
+  the brightness of the color.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.readableTextColor(color) == Color.fromRGBA(0, 0, 0, 100)
+  */
+  fun readableTextColor (color : Color) : Color {
+    try {
+      brightness =
+        getBrightness(color)
+
+      if (brightness > 125) {
+        mix(0.1, color, Color::RGBA(0, 0, 0, 100))
+      } else {
+        mix(0.05, color, Color::RGBA(255, 255, 255, 100))
+      }
+    }
+  }
+
+  /*
+  Calculates the relative luminance of a color.
+  https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+  */
+  fun relativeLuminance (color : Color) : Number {
+    try {
+      item =
+        Color.toRGBATuple(color)
+
+      normalize =
+        (value : Number) {
+          if (value <= 0.03928) {
+            value / 12.92
+          } else {
+            `Math.pow((#{value} + 0.055) / 1.055, 2.4)`
+          }
+        }
+
+      r =
+        normalize(item[0] / 255)
+
+      g =
+        normalize(item[1] / 255)
+
+      b =
+        normalize(item[2] / 255)
+
+      0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+  }
+
+  /*
+  Sets the alpha to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setAlpha(50, color) == Color.fromHSVA(0, 100, 100, 50)
+  */
+  fun setAlpha (alpha : Number, color : Color) : Color {
+    case (color) {
+      Color::HSVA(hue, staturation, value, oldAlpha) =>
+        Color::HSVA(hue, staturation, value, Math.round(Math.clamp(0, 100, alpha)))
+
+      =>
+        color
+        |> toHSVA
+        |> setAlpha(alpha)
+    }
+  }
+
+  /*
+  Sets the hue to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setHue(50, color) == Color.fromHSVA(50, 100, 100, 100)
+  */
+  fun setHue (hue : Number, color : Color) : Color {
+    case (color) {
+      Color::HSVA(oldHue, saturation, value, alpha) =>
+        Color::HSVA(Math.round(Math.clamp(0, hue, 360)), saturation, value, alpha)
+
+      =>
+        color
+        |> toHSVA
+        |> setHue(hue)
+    }
+  }
+
+  /*
+  Sets the lightness to the given value of the given color.
+
+    color =
+      Color.fromHSLA(0, 100, 100, 100)
+
+    Color.setLightness(50, color) == Color.fromHSLA(0, 100, 50, 100)
+  */
+  fun setLightness (lightness : Number, color : Color) : Color {
+    case (color) {
+      Color::HSLA(hue, saturation, oldLightness, alpha) =>
+        Color::HSLA(hue, saturation, Math.round(Math.clamp(0, 100, lightness)), alpha)
+
+      =>
+        color
+        |> toHSLA
+        |> setValue(lightness)
+    }
+  }
+
+  /*
+  Sets the saturation to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setSaturation(50, color) == Color.fromHSVA(0, 50, 100, 100)
+  */
+  fun setSaturation (saturation : Number, color : Color) : Color {
+    case (color) {
+      Color::HSVA(hue, oldSaturation, value, alpha) =>
+        Color::HSVA(hue, Math.round(Math.clamp(0, 100, saturation)), value, alpha)
+
+      =>
+        color
+        |> toHSVA
+        |> setSaturation(saturation)
+    }
+  }
+
+  /*
+  Sets the value to the given value of the given color.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.setValue(50, color) == Color.fromHSVA(0, 100, 50, 100)
+  */
+  fun setValue (value : Number, color : Color) : Color {
+    case (color) {
+      Color::HSVA(hue, saturation, oldValue, alpha) =>
+        Color::HSVA(hue, saturation, Math.round(Math.clamp(0, 100, value)), alpha)
+
+      =>
+        color
+        |> toHSVA
+        |> setValue(value)
+    }
+  }
+
+  /*
+  Converts the given color to the CSS HEX representation.
+
+    color =
+      Color.fromHex("#FFF")
+
+    Color.toCSSHex(color) == "#FFFFFFFF"
+  */
+  fun toCSSHex (color : Color) : String {
+    case (color) {
+      Color::HEX(value) => "##{value}"
+
+      =>
+        color
+        |> toHEX
+        |> toCSSHex
+    }
+  }
+
+  /*
+  Converts the given color to the CSS RGBA representation.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toCSSRGBA(color) == "rgba(255,255,255,1)"
+  */
+  fun toCSSRGBA (color : Color) : String {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        "rgba(#{red}, #{green}, #{blue}, #{alpha / 100})"
+
+      =>
+        color
+        |> toRGBA
+        |> toCSSRGBA
+    }
+  }
+
+  /*
+  Converts the internal representation of the color to HEX.
+
+    color =
+      Color.fromHSVA(0, 100, 100, 100)
+
+    Color.toHEX(color) == Color.fromHEX("#FFFFFFFF")
+  */
+  fun toHEX (color : Color) : Color {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        try {
+          redPart =
+            `#{red}.toString(16).padStart(2,'0')`
+
+          greenPart =
+            `#{green}.toString(16).padStart(2,'0')`
+
+          bluePart =
+            `#{blue}.toString(16).padStart(2,'0')`
+
+          alphaPart =
+            `#{Math.round(alpha * 2.55)}.toString(16).padStart(2,'0')`
+
+          Color::HEX(String.toUpperCase("#{redPart}#{greenPart}#{bluePart}#{alphaPart}"))
+        }
+
+      Color::HEX => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHEX
+    }
+  }
+
+  /*
+  Converts the internal representation of the color to HSIA.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toHSIA(color) == Color.fromHSVA(0, 100, 100, 100)
+  */
+  fun toHSIA (color : Color) : Color {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        try {
+          normalizedRed =
+            Math.clamp(0, 255, red) / 255
+
+          normalizedBlue =
+            Math.clamp(0, 255, blue) / 255
+
+          normalizedGreen =
+            Math.clamp(0, 255, green) / 255
+
+          intensity =
+            (normalizedRed + normalizedGreen + normalizedBlue) / 3
+
+          if (normalizedRed == normalizedGreen &&
+              normalizedGreen == normalizedBlue) {
+            Color::HSIA(
+              Math.round(0),
+              Math.round(0),
+              Math.round(intensity * 100),
+              Math.round(alpha))
+          } else {
+            try {
+              w =
+                (normalizedRed - normalizedGreen + normalizedRed - normalizedBlue) / Math.sqrt(
+                  (normalizedRed - normalizedGreen) * (normalizedRed - normalizedGreen) +
+                    (normalizedRed - normalizedBlue) * (normalizedGreen - normalizedBlue)) / 2
+
+              hueBase =
+                Math.acos(w) * 180 / Math:PI
+
+              hue =
+                if (normalizedBlue > normalizedGreen) {
+                  360 - hueBase
+                } else {
+                  hueBase
+                }
+
+              saturation =
+                if (intensity == 0) {
+                  0
+                } else {
+                  1 - ((Array.min([normalizedRed, normalizedGreen, normalizedBlue]) or 0) / intensity)
+                }
+
+              Color::HSIA(
+                Math.round(hue),
+                Math.round(saturation * 100),
+                Math.round(intensity * 100),
+                Math.round(alpha))
+            }
+          }
+        }
+
+      Color::HSIA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSIA
+    }
+  }
+
+  /*
+  Converts the internal representation of the color to HSLA.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toHSLA(color) == Color.fromHSLA(0, 100, 100, 100)
+  */
+  fun toHSLA (color : Color) : Color {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        try {
+          normalizedRed =
+            Math.clamp(0, 255, red) / 255
+
+          normalizedBlue =
+            Math.clamp(0, 255, blue) / 255
+
+          normalizedGreen =
+            Math.clamp(0, 255, green) / 255
+
+          cMax =
+            normalizedRed
+            |> Math.max(normalizedBlue)
+            |> Math.max(normalizedGreen)
+
+          cMin =
+            normalizedRed
+            |> Math.min(normalizedBlue)
+            |> Math.min(normalizedGreen)
+
+          delta =
+            cMax - cMin
+
+          lightness =
+            (cMax + cMin) / 2
+
+          saturation =
+            if (delta == 0) {
+              0
+            } else {
+              1 - Math.abs(2 * lightness - 1)
+            }
+
+          hue =
+            if (delta == 0) {
+              0
+            } else if (cMax == normalizedRed) {
+              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
+            } else if (cMax == normalizedBlue) {
+              60 * ((normalizedRed - normalizedGreen / delta) + 4)
+            } else {
+              60 * ((normalizedBlue - normalizedRed / delta) + 2)
+            }
+
+          Color::HSLA(
+            Math.round(hue),
+            Math.round(saturation * 100),
+            Math.round(lightness * 100),
+            Math.round(alpha))
+        }
+
+      Color::HSLA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSLA
+    }
+  }
+
+  /*
+  Returns the given color as a HSLA tuple.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toHSLATuple(color) == {255,255,255,100}
+  */
+  fun toHSLATuple (color : Color) : Tuple(Number, Number, Number, Number) {
+    case (color) {
+      Color::HSLA(hue, saturation, lightness, alpha) =>
+        {hue, saturation, lightness, alpha}
+
+      =>
+        color
+        |> toHSLA
+        |> toHSLATuple
+    }
+  }
+
+  /*
+  Converts the internal representation of the color to HSVA.
+
+    color =
+      Color.fromRGBA(255, 255, 255, 100)
+
+    Color.toHSVA(color) == Color.fromHSVA(0, 100, 100, 100)
+  */
+  fun toHSVA (color : Color) : Color {
+    case (color) {
+      Color::RGBA(red, green, blue, alpha) =>
+        try {
+          normalizedRed =
+            Math.clamp(0, 255, red) / 255
+
+          normalizedBlue =
+            Math.clamp(0, 255, blue) / 255
+
+          normalizedGreen =
+            Math.clamp(0, 255, green) / 255
+
+          cMax =
+            normalizedRed
+            |> Math.max(normalizedBlue)
+            |> Math.max(normalizedGreen)
+
+          cMin =
+            normalizedRed
+            |> Math.min(normalizedBlue)
+            |> Math.min(normalizedGreen)
+
+          delta =
+            cMax - cMin
+
+          value =
+            cMax
+
+          saturation =
+            if (cMax == 0) {
+              0
+            } else {
+              delta / cMax
+            }
+
+          hue =
+            if (delta == 0) {
+              0
+            } else if (cMax == normalizedRed) {
+              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
+            } else if (cMax == normalizedBlue) {
+              60 * ((normalizedRed - normalizedGreen / delta) + 4)
+            } else {
+              60 * ((normalizedBlue - normalizedRed / delta) + 2)
+            }
+
+          Color::HSVA(
+            Math.round(hue),
+            Math.round(saturation * 100),
+            Math.round(value * 100),
+            Math.round(alpha))
+        }
+
+      Color::HSVA => color
+
+      =>
+        color
+        |> toRGBA
+        |> toHSVA
+    }
+  }
+
   /*
   Converts the internal representation of the color to RGBA.
 
@@ -521,6 +825,59 @@ module Color {
           return #{Color::RGBA(`red`, `green`, `blue`, `alpha / 255 * 100`)}
         })()
         `
+
+      Color::HSIA(hue, saturation, intensity, alpha) =>
+        try {
+          normalizedSaturation =
+            Math.clamp(0, 100, saturation) / 100
+
+          normalizedIntensity =
+            Math.clamp(0, 100, intensity) / 100
+
+          normalizedAlpha =
+            Math.clamp(0, 100, alpha)
+
+          normalizedHue =
+            Math.clamp(0, 360, hue)
+
+          hTag =
+            normalizedHue / 60
+
+          z =
+            1 - Math.abs(Math.fmod(hTag, 2) - 1)
+
+          c =
+            (3 * normalizedIntensity * normalizedSaturation) / (1 + z)
+
+          x =
+            c * z
+
+          m =
+            normalizedIntensity * (1 - normalizedSaturation)
+
+          {red, green, blue} =
+            if (0 <= hTag && hTag <= 1) {
+              {c, x, 0}
+            } else if (1 < hTag && hTag <= 2) {
+              {x, c, 0}
+            } else if (2 < hTag && hTag <= 3) {
+              {0, c, x}
+            } else if (3 < hTag && hTag <= 4) {
+              {0, x, c}
+            } else if (4 < hTag && hTag <= 5) {
+              {x, 0, c}
+            } else if (5 < hTag && hTag <= 6) {
+              {c, 0, x}
+            } else {
+              {0, 0, 0}
+            }
+
+          Color::RGBA(
+            Math.round((red + m) * 255),
+            Math.round((green + m) * 255),
+            Math.round((blue + m) * 255),
+            normalizedAlpha)
+        }
 
       Color::HSLA(hue, saturation, lightness, alpha) =>
         try {
@@ -615,144 +972,63 @@ module Color {
   }
 
   /*
-  Converts the internal representation of the color to HSLA.
+  Returns the given color as an RGBA tuple.
 
     color =
       Color.fromRGBA(255, 255, 255, 100)
 
-    Color.toHSLA(color) == Color.fromHSLA(0, 100, 100, 100)
+    Color.toRGBATuple(color) == {255,255,255,100}
   */
-  fun toHSLA (color : Color) : Color {
+  fun toRGBATuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
-        try {
-          normalizedRed =
-            Math.clamp(0, 255, red) / 255
-
-          normalizedBlue =
-            Math.clamp(0, 255, blue) / 255
-
-          normalizedGreen =
-            Math.clamp(0, 255, green) / 255
-
-          cMax =
-            normalizedRed
-            |> Math.max(normalizedBlue)
-            |> Math.max(normalizedGreen)
-
-          cMin =
-            normalizedRed
-            |> Math.min(normalizedBlue)
-            |> Math.min(normalizedGreen)
-
-          delta =
-            cMax - cMin
-
-          lightness =
-            (cMax + cMin) / 2
-
-          saturation =
-            if (delta == 0) {
-              0
-            } else {
-              1 - Math.abs(2 * lightness - 1)
-            }
-
-          hue =
-            if (delta == 0) {
-              0
-            } else if (cMax == normalizedRed) {
-              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
-            } else if (cMax == normalizedBlue) {
-              60 * ((normalizedRed - normalizedGreen / delta) + 4)
-            } else {
-              60 * ((normalizedBlue - normalizedRed / delta) + 2)
-            }
-
-          Color::HSLA(
-            Math.round(hue),
-            Math.round(saturation * 100),
-            Math.round(lightness * 100),
-            Math.round(alpha))
-        }
-
-      Color::HSLA => color
+        {red, green, blue, alpha}
 
       =>
         color
         |> toRGBA
-        |> toHSLA
+        |> toRGBATuple
     }
   }
 
-  /*
-  Converts the internal representation of the color to HSVA.
+  /* Returns the CSS HSLA representation of the color. */
+  fun toCSSHSLA (color : Color) : String {
+    case (color) {
+      Color::HSLA(hue, saturation, lightness, alpha) =>
+        "hsla(#{hue}, #{saturation}%, #{lightness}%, #{Math.round(alpha / 100)})"
 
-    color =
-      Color.fromRGBA(255, 255, 255, 100)
+      =>
+        color
+        |> toHSLA
+        |> toCSSHSLA
+    }
+  }
 
-    Color.toHSVA(color) == Color.fromHSVA(0, 100, 100, 100)
-  */
-  fun toHSVA (color : Color) : Color {
+  /* Returns the CSS Percent RGBA representation of the color. */
+  fun toCSSRGBAPercent (color : Color) : String {
+    try {
+      {red, green, blue, alpha} =
+        toRGBAPercentTuple(color)
+
+      "rgba(#{red}%, #{green}%, #{blue}%, #{alpha}%)"
+    }
+  }
+
+  /* Returns the the color as an Percent RGBA tuple (0..1). */
+  fun toRGBAPercentTuple (color : Color) : Tuple(Number, Number, Number, Number) {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
-        try {
-          normalizedRed =
-            Math.clamp(0, 255, red) / 255
-
-          normalizedBlue =
-            Math.clamp(0, 255, blue) / 255
-
-          normalizedGreen =
-            Math.clamp(0, 255, green) / 255
-
-          cMax =
-            normalizedRed
-            |> Math.max(normalizedBlue)
-            |> Math.max(normalizedGreen)
-
-          cMin =
-            normalizedRed
-            |> Math.min(normalizedBlue)
-            |> Math.min(normalizedGreen)
-
-          delta =
-            cMax - cMin
-
-          value =
-            cMax
-
-          saturation =
-            if (cMax == 0) {
-              0
-            } else {
-              delta / cMax
-            }
-
-          hue =
-            if (delta == 0) {
-              0
-            } else if (cMax == normalizedRed) {
-              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
-            } else if (cMax == normalizedBlue) {
-              60 * ((normalizedRed - normalizedGreen / delta) + 4)
-            } else {
-              60 * ((normalizedBlue - normalizedRed / delta) + 2)
-            }
-
-          Color::HSVA(
-            Math.round(hue),
-            Math.round(saturation * 100),
-            Math.round(value * 100),
-            Math.round(alpha))
+        {
+          Math.round((red / 255) * 100),
+          Math.round((green / 255) * 100),
+          Math.round((blue / 255) * 100),
+          alpha
         }
-
-      Color::HSVA => color
 
       =>
         color
         |> toRGBA
-        |> toHSVA
+        |> toRGBAPercentTuple
     }
   }
 }
