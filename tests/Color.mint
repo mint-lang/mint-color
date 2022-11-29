@@ -227,43 +227,41 @@ suite "Color.readableTextColor" {
 
 suite "Color.toHSIA" {
   test "it converts correctly" {
-    try {
-      tests =
-        [
-          {Color::RGBA(255, 255, 255, 100), Color::HSIA(0, 0, 100, 100)},
-          {Color::RGBA(128, 128, 128, 100), Color::HSIA(0, 0, 50, 100)},
-          {Color::RGBA(0, 0, 0, 100), Color::HSIA(0, 0, 0, 100)},
-          {Color::RGBA(252, 0, 0, 100), Color::HSIA(0, 100, 33, 100)},
-          {Color::RGBA(191, 191, 0, 100), Color::HSIA(60, 100, 50, 100)},
-          {Color::RGBA(0, 122, 0, 100), Color::HSIA(120, 100, 16, 100)},
-          {Color::RGBA(127, 254, 254, 100), Color::HSIA(180, 40, 83, 100)},
-          {Color::RGBA(126, 126, 252, 100), Color::HSIA(240, 25, 66, 100)},
-          {Color::RGBA(190, 64, 190, 100), Color::HSIA(300, 57, 58, 100)},
-          {Color::RGBA(161, 163, 36, 100), Color::HSIA(61, 70, 47, 100)}
-        ]
+    tests:
+      [
+        {Color::RGBA(255, 255, 255, 100), Color::HSIA(0, 0, 100, 100)},
+        {Color::RGBA(128, 128, 128, 100), Color::HSIA(0, 0, 50, 100)},
+        {Color::RGBA(0, 0, 0, 100), Color::HSIA(0, 0, 0, 100)},
+        {Color::RGBA(252, 0, 0, 100), Color::HSIA(0, 100, 33, 100)},
+        {Color::RGBA(191, 191, 0, 100), Color::HSIA(60, 100, 50, 100)},
+        {Color::RGBA(0, 122, 0, 100), Color::HSIA(120, 100, 16, 100)},
+        {Color::RGBA(127, 254, 254, 100), Color::HSIA(180, 40, 83, 100)},
+        {Color::RGBA(126, 126, 252, 100), Color::HSIA(240, 25, 66, 100)},
+        {Color::RGBA(190, 64, 190, 100), Color::HSIA(300, 57, 58, 100)},
+        {Color::RGBA(161, 163, 36, 100), Color::HSIA(61, 70, 47, 100)}
+      ]
 
-      expected =
-        for (item of tests) {
-          item[1]
-        }
+    expected:
+      for (item of tests) {
+        item[1]
+      }
 
-      expected1 =
-        for (item of tests) {
-          item[0]
-        }
+    expected1:
+      for (item of tests) {
+        item[0]
+      }
 
-      actual =
-        for (item of tests) {
-          Color.toHSIA(item[0])
-        }
+    actual:
+      for (item of tests) {
+        Color.toHSIA(item[0])
+      }
 
-      actual1 =
-        for (item of tests) {
-          Color.toRGBA(item[1])
-        }
+    actual1:
+      for (item of tests) {
+        Color.toRGBA(item[1])
+      }
 
-      actual == expected &&
-        actual1 == expected1
-    }
+    actual == expected &&
+      actual1 == expected1
   }
 }

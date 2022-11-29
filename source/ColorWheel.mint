@@ -1,15 +1,13 @@
 module ColorWheel {
   fun adjustHue (value : Number) : Number {
-    try {
-      newValue =
-        if (value < 0) {
-          value + Math.ceil(-value / 360) * 360
-        } else {
-          value
-        }
+    newValue:
+      if (value < 0) {
+        value + Math.ceil(-value / 360) * 360
+      } else {
+        value
+      }
 
-      newValue % 360
-    }
+    newValue % 360
   }
 
   fun complementary (color : Color) : Array(Color) {
@@ -20,61 +18,53 @@ module ColorWheel {
   }
 
   fun splitComplementary (color : Color) : Array(Color) {
-    try {
-      hue =
-        Color.getHue(color)
+    hue:
+      Color.getHue(color)
 
-      [
-        color,
-        Color.setHue(adjustHue(hue + 150), color),
-        Color.setHue(adjustHue(hue + 210), color),
-        Color.setHue(adjustHue(hue + 15), color)
-      ]
-    }
+    [
+      color,
+      Color.setHue(adjustHue(hue + 150), color),
+      Color.setHue(adjustHue(hue + 210), color),
+      Color.setHue(adjustHue(hue + 15), color)
+    ]
   }
 
   fun analogous (color : Color) : Array(Color) {
-    try {
-      hue =
-        Color.getHue(color)
+    hue:
+      Color.getHue(color)
 
-      [
-        color,
-        Color.setHue(adjustHue(hue + 5), color),
-        Color.setHue(adjustHue(hue + 10), color),
-        Color.setHue(adjustHue(hue + 15), color),
-        Color.setHue(adjustHue(hue + 20), color),
-        Color.setHue(adjustHue(hue + 25), color),
-        Color.setHue(adjustHue(hue + 30), color)
-      ]
-    }
+    [
+      color,
+      Color.setHue(adjustHue(hue + 5), color),
+      Color.setHue(adjustHue(hue + 10), color),
+      Color.setHue(adjustHue(hue + 15), color),
+      Color.setHue(adjustHue(hue + 20), color),
+      Color.setHue(adjustHue(hue + 25), color),
+      Color.setHue(adjustHue(hue + 30), color)
+    ]
   }
 
   fun triadic (color : Color) : Array(Color) {
-    try {
-      hue =
-        Color.getHue(color)
+    hue:
+      Color.getHue(color)
 
-      [
-        color,
-        Color.setHue(adjustHue(hue + 120), color),
-        Color.setHue(adjustHue(hue + 240), color)
-      ]
-    }
+    [
+      color,
+      Color.setHue(adjustHue(hue + 120), color),
+      Color.setHue(adjustHue(hue + 240), color)
+    ]
   }
 
   fun tetradic (color : Color) : Array(Color) {
-    try {
-      hue =
-        Color.getHue(color)
+    hue:
+      Color.getHue(color)
 
-      [
-        color,
-        Color.setHue(adjustHue(hue + 90), color),
-        Color.setHue(adjustHue(hue + 180), color),
-        Color.setHue(adjustHue(hue + 270), color)
-      ]
-    }
+    [
+      color,
+      Color.setHue(adjustHue(hue + 90), color),
+      Color.setHue(adjustHue(hue + 180), color),
+      Color.setHue(adjustHue(hue + 270), color)
+    ]
   }
 
   fun monochromatic (color : Color) : Array(Color) {

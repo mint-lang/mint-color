@@ -43,52 +43,50 @@ module ColorPalette {
     background : Color,
     backgroundInverse : Color
   ) : ColorPalette {
-    try {
-      {hue, saturation, lightness} =
-        Color.toHSLATuple(color)
+    {hue, saturation, lightness}:
+      Color.toHSLATuple(color)
 
-      s50 =
-        Color.mix(0.15, color, background)
+    s50:
+      Color.mix(0.15, color, background)
 
-      s100 =
-        Color.mix(0.3, color, background)
+    s100:
+      Color.mix(0.3, color, background)
 
-      s200 =
-        Color.mix(0.5, color, background)
+    s200:
+      Color.mix(0.5, color, background)
 
-      s300 =
-        Color.mix(0.7, color, background)
+    s300:
+      Color.mix(0.7, color, background)
 
-      s400 =
-        Color.mix(0.85, color, background)
+    s400:
+      Color.mix(0.85, color, background)
 
-      s600 =
-        Color.mix(0.85, color, backgroundInverse)
+    s600:
+      Color.mix(0.85, color, backgroundInverse)
 
-      s700 =
-        Color.mix(0.7, color, backgroundInverse)
+    s700:
+      Color.mix(0.7, color, backgroundInverse)
 
-      s800 =
-        Color.mix(0.5, color, backgroundInverse)
+    s800:
+      Color.mix(0.5, color, backgroundInverse)
 
-      s900 =
-        Color.mix(0.35, color, backgroundInverse)
+    s900:
+      Color.mix(0.35, color, backgroundInverse)
 
-      {
-        s900 = shadeFromColor(s900),
-        s800 = shadeFromColor(s800),
-        s700 = shadeFromColor(s700),
-        s600 = shadeFromColor(s600),
-        s500 = shadeFromColor(color),
-        s400 = shadeFromColor(s400),
-        s300 = shadeFromColor(s300),
-        s200 = shadeFromColor(s200),
-        s100 = shadeFromColor(s100),
-        s50 = shadeFromColor(s50),
-        saturation = saturation,
-        lightness = lightness,
-        hue = hue
-      }
+    {
+      s900 = shadeFromColor(s900),
+      s800 = shadeFromColor(s800),
+      s700 = shadeFromColor(s700),
+      s600 = shadeFromColor(s600),
+      s500 = shadeFromColor(color),
+      s400 = shadeFromColor(s400),
+      s300 = shadeFromColor(s300),
+      s200 = shadeFromColor(s200),
+      s100 = shadeFromColor(s100),
+      s50 = shadeFromColor(s50),
+      saturation = saturation,
+      lightness = lightness,
+      hue = hue
     }
   }
 }
