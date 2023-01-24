@@ -61,13 +61,13 @@ module Color {
   https://www.w3.org/TR/2008/REC-WCAG20-20081211/#visual-audio-contrast-contrast
   */
   fun contrastRatio (background : Color, text : Color) : Number {
-    color1:
+    let color1 =
       Color.relativeLuminance(text)
 
-    color2:
+    let color2 =
       Color.relativeLuminance(background)
 
-    ratio:
+    let ratio =
       if (color1 > color2) {
         (color1 + 0.05) / (color2 + 0.05)
       } else {
@@ -85,26 +85,26 @@ module Color {
     Color.fromHEX("#FFFFFFFF")
   */
   fun fromHEX (value : String) : Maybe(Color) {
-    normalized:
+    let normalized =
       value
       |> String.replace("#", "")
       |> String.toUpperCase()
 
-    if (Regexp.match(normalized, HEX_REGEXP)) {
+    if (Regexp.match(HEX_REGEXP, normalized)) {
       case (String.size(normalized)) {
         3 =>
           {
-            splitted:
-              String.split("", normalized)
+            let splitted =
+              String.split(normalized, "")
 
-            red:
-              Maybe.withDefault("", splitted[0])
+            let red =
+              Maybe.withDefault(splitted[0], "")
 
-            green:
-              Maybe.withDefault("", splitted[1])
+            let green =
+              Maybe.withDefault(splitted[1], "")
 
-            blue:
-              Maybe.withDefault("", splitted[2])
+            let blue =
+              Maybe.withDefault(splitted[2], "")
 
             Maybe::Just(Color::HEX("#{red}#{red}#{green}#{green}#{blue}#{blue}FF"))
           }
@@ -130,10 +130,10 @@ module Color {
     alpha : Number
   ) : Color {
     Color::HSVA(
-      Math.clamp(0, 360, hue),
-      Math.clamp(0, 100, saturation),
-      Math.clamp(0, 100, value),
-      Math.clamp(0, 100, alpha))
+      Math.clamp(hue, 0, 360),
+      Math.clamp(saturation, 0, 100),
+      Math.clamp(value, 0, 100),
+      Math.clamp(alpha, 0, 100))
   }
 
   /*
@@ -148,10 +148,10 @@ module Color {
     alpha : Number
   ) : Color {
     Color::RGBA(
-      Math.clamp(0, 255, red),
-      Math.clamp(0, 255, green),
-      Math.clamp(0, 255, blue),
-      Math.clamp(0, 100, alpha))
+      Math.clamp(red, 0, 255),
+      Math.clamp(green, 0, 255),
+      Math.clamp(blue, 0, 255),
+      Math.clamp(alpha, 0, 100))
   }
 
   /*
@@ -247,14 +247,14 @@ module Color {
     color =
       Color.fromHSLA(0, 100, 10, 100)
 
-    Color.lighten(10, color) == Color.fromHSLA(0, 100, 100, 100)
+    Color.lighten(color, 10) == Color.fromHSLA(0, 100, 100, 100)
   */
-  fun lighten (ratio : Number, color : Color) : Color {
+  fun lighten (color : Color, ratio : Number) : Color {
     case (color) {
       Color::HSLA(hue, saturation, lightness, alpha) =>
         {
-          newLightness:
-            Math.clamp(0, 100, lightness + lightness * ratio)
+          let newLightness =
+            Math.clamp(lightness + lightness * ratio, 0, 100)
 
           Color::HSLA(hue, saturation, newLightness, alpha)
         }
@@ -275,45 +275,45 @@ module Color {
     color2 =
       Color.fromRGBA(0, 0, 0, 100)
 
-    Color.mix(0.5, color1, color2) == Color.fromRGBA(128, 128, 128, 100)
+    Color.mix(color1, color2, 0.5) == Color.fromRGBA(128, 128, 128, 100)
   */
-  fun mix (weight : Number, color1 : Color, color2 : Color) : Color {
+  fun mix (color1 : Color, color2 : Color, weight : Number) : Color {
     {
-      {red1, green1, blue1, alpha1}:
-        Color.toRGBATuple(color1)
-
-      {red2, green2, blue2, alpha2}:
+      let {red1, green1, blue1, alpha1} =
         Color.toRGBATuple(color2)
 
-      a:
+      let {red2, green2, blue2, alpha2} =
+        Color.toRGBATuple(color1)
+
+      let a =
         alpha1 - alpha2
 
-      w:
+      let w =
         2 * weight - 1
 
-      wt:
+      let wt =
         if (w * a == -1) {
           w
         } else {
           (w + a) / (1 + w * a)
         }
 
-      w1:
+      let w1 =
         (wt + 1) / 2.0
 
-      w2:
+      let w2 =
         1 - w1
 
-      red:
+      let red =
         w1 * red1 + w2 * red2
 
-      green:
+      let green =
         w1 * green1 + w2 * green2
 
-      blue:
+      let blue =
         w1 * blue1 + w2 * blue2
 
-      alpha:
+      let alpha =
         alpha1 * weight + alpha2 * (1 - weight)
 
       Color::RGBA(red, green, blue, alpha)
@@ -331,7 +331,7 @@ module Color {
         color += letters[Math.floor(Math.random() * 16)];
       }
 
-      return #{Maybe.withDefault(Color::HEX("000000"), Color.fromHEX(`color`))};
+      return #{Maybe.withDefault(Color.fromHEX(`color`), Color::HEX("000000"))};
     })()
     `
   }
@@ -346,15 +346,13 @@ module Color {
     Color.readableTextColor(color) == Color.fromRGBA(0, 0, 0, 100)
   */
   fun readableTextColor (color : Color) : Color {
-    {
-      brightness:
-        getBrightness(color)
+    let brightness =
+      getBrightness(color)
 
-      if (brightness > 125) {
-        mix(0.1, color, Color::RGBA(0, 0, 0, 100))
-      } else {
-        mix(0.05, color, Color::RGBA(255, 255, 255, 100))
-      }
+    if (brightness > 125) {
+      mix(Color::RGBA(0, 0, 0, 100), color, 0.1)
+    } else {
+      mix(Color::RGBA(255, 255, 255, 100), color, 0.05)
     }
   }
 
@@ -363,30 +361,28 @@ module Color {
   https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   */
   fun relativeLuminance (color : Color) : Number {
-    {
-      item:
-        Color.toRGBATuple(color)
+    let item =
+      Color.toRGBATuple(color)
 
-      normalize:
-        (value : Number) {
-          if (value <= 0.03928) {
-            value / 12.92
-          } else {
-            `Math.pow((#{value} + 0.055) / 1.055, 2.4)`
-          }
+    let normalize =
+      (value : Number) {
+        if (value <= 0.03928) {
+          value / 12.92
+        } else {
+          `Math.pow((#{value} + 0.055) / 1.055, 2.4)`
         }
+      }
 
-      r:
-        normalize(item[0] / 255)
+    let r =
+      normalize(item[0] / 255)
 
-      g:
-        normalize(item[1] / 255)
+    let g =
+      normalize(item[1] / 255)
 
-      b:
-        normalize(item[2] / 255)
+    let b =
+      normalize(item[2] / 255)
 
-      0.2126 * r + 0.7152 * g + 0.0722 * b
-    }
+    0.2126 * r + 0.7152 * g + 0.0722 * b
   }
 
   /*
@@ -395,12 +391,12 @@ module Color {
     color =
       Color.fromHSVA(0, 100, 100, 100)
 
-    Color.setAlpha(50, color) == Color.fromHSVA(0, 100, 100, 50)
+    Color.setAlpha(color, 50) == Color.fromHSVA(0, 100, 100, 50)
   */
-  fun setAlpha (alpha : Number, color : Color) : Color {
+  fun setAlpha (color : Color, alpha : Number) : Color {
     case (color) {
       Color::HSVA(hue, staturation, value, oldAlpha) =>
-        Color::HSVA(hue, staturation, value, Math.round(Math.clamp(0, 100, alpha)))
+        Color::HSVA(hue, staturation, value, Math.round(Math.clamp(alpha, 0, 100)))
 
       =>
         color
@@ -415,12 +411,12 @@ module Color {
     color =
       Color.fromHSVA(0, 100, 100, 100)
 
-    Color.setHue(50, color) == Color.fromHSVA(50, 100, 100, 100)
+    Color.setHue(color, 50) == Color.fromHSVA(50, 100, 100, 100)
   */
-  fun setHue (hue : Number, color : Color) : Color {
+  fun setHue (color : Color, hue : Number) : Color {
     case (color) {
       Color::HSVA(oldHue, saturation, value, alpha) =>
-        Color::HSVA(Math.round(Math.clamp(0, hue, 360)), saturation, value, alpha)
+        Color::HSVA(Math.round(Math.clamp(hue, 0, 360)), saturation, value, alpha)
 
       =>
         color
@@ -437,10 +433,10 @@ module Color {
 
     Color.setLightness(50, color) == Color.fromHSLA(0, 100, 50, 100)
   */
-  fun setLightness (lightness : Number, color : Color) : Color {
+  fun setLightness (color : Color, lightness : Number) : Color {
     case (color) {
       Color::HSLA(hue, saturation, oldLightness, alpha) =>
-        Color::HSLA(hue, saturation, Math.round(Math.clamp(0, 100, lightness)), alpha)
+        Color::HSLA(hue, saturation, Math.round(Math.clamp(lightness, 0, 100)), alpha)
 
       =>
         color
@@ -457,10 +453,10 @@ module Color {
 
     Color.setSaturation(50, color) == Color.fromHSVA(0, 50, 100, 100)
   */
-  fun setSaturation (saturation : Number, color : Color) : Color {
+  fun setSaturation (color : Color, saturation : Number) : Color {
     case (color) {
       Color::HSVA(hue, oldSaturation, value, alpha) =>
-        Color::HSVA(hue, Math.round(Math.clamp(0, 100, saturation)), value, alpha)
+        Color::HSVA(hue, Math.round(Math.clamp(saturation, 0, 100)), value, alpha)
 
       =>
         color
@@ -477,10 +473,10 @@ module Color {
 
     Color.setValue(50, color) == Color.fromHSVA(0, 100, 50, 100)
   */
-  fun setValue (value : Number, color : Color) : Color {
+  fun setValue (color : Color, value : Number) : Color {
     case (color) {
       Color::HSVA(hue, saturation, oldValue, alpha) =>
-        Color::HSVA(hue, saturation, Math.round(Math.clamp(0, 100, value)), alpha)
+        Color::HSVA(hue, saturation, Math.round(Math.clamp(value, 0, 100)), alpha)
 
       =>
         color
@@ -540,16 +536,16 @@ module Color {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
         {
-          redPart:
+          let redPart =
             `#{Math.round(red)}.toString(16).padStart(2,'0')`
 
-          greenPart:
+          let greenPart =
             `#{Math.round(green)}.toString(16).padStart(2,'0')`
 
-          bluePart:
+          let bluePart =
             `#{Math.round(blue)}.toString(16).padStart(2,'0')`
 
-          alphaPart:
+          let alphaPart =
             `#{Math.round(alpha * 2.55)}.toString(16).padStart(2,'0')`
 
           Color::HEX(String.toUpperCase("#{redPart}#{greenPart}#{bluePart}#{alphaPart}"))
@@ -576,16 +572,16 @@ module Color {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
         {
-          normalizedRed:
-            Math.clamp(0, 255, red) / 255
+          let normalizedRed =
+            Math.clamp(red, 0, 255) / 255
 
-          normalizedBlue:
-            Math.clamp(0, 255, blue) / 255
+          let normalizedBlue =
+            Math.clamp(blue, 0, 255) / 255
 
-          normalizedGreen:
-            Math.clamp(0, 255, green) / 255
+          let normalizedGreen =
+            Math.clamp(green, 0, 255) / 255
 
-          intensity:
+          let intensity =
             (normalizedRed + normalizedGreen + normalizedBlue) / 3
 
           if (normalizedRed == normalizedGreen &&
@@ -596,22 +592,22 @@ module Color {
               Math.round(intensity * 100),
               Math.round(alpha))
           } else {
-            w:
+            let w =
               (normalizedRed - normalizedGreen + normalizedRed - normalizedBlue) / Math.sqrt(
                 (normalizedRed - normalizedGreen) * (normalizedRed - normalizedGreen) +
                   (normalizedRed - normalizedBlue) * (normalizedGreen - normalizedBlue)) / 2
 
-            hueBase:
+            let hueBase =
               Math.acos(w) * 180 / Math:PI
 
-            hue:
+            let hue =
               if (normalizedBlue > normalizedGreen) {
                 360 - hueBase
               } else {
                 hueBase
               }
 
-            saturation:
+            let saturation =
               if (intensity == 0) {
                 0
               } else {
@@ -647,43 +643,43 @@ module Color {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
         {
-          normalizedRed:
-            Math.clamp(0, 255, red) / 255
+          let normalizedRed =
+            Math.clamp(red, 0, 255) / 255
 
-          normalizedBlue:
-            Math.clamp(0, 255, blue) / 255
+          let normalizedBlue =
+            Math.clamp(blue, 0, 255) / 255
 
-          normalizedGreen:
-            Math.clamp(0, 255, green) / 255
+          let normalizedGreen =
+            Math.clamp(green, 0, 255) / 255
 
-          cMax:
+          let cMax =
             normalizedRed
             |> Math.max(normalizedBlue)
             |> Math.max(normalizedGreen)
 
-          cMin:
+          let cMin =
             normalizedRed
             |> Math.min(normalizedBlue)
             |> Math.min(normalizedGreen)
 
-          delta:
+          let delta =
             cMax - cMin
 
-          lightness:
+          let lightness =
             (cMax + cMin) / 2
 
-          saturation:
+          let saturation =
             if (delta == 0) {
               0
             } else {
               1 - Math.abs(2 * lightness - 1)
             }
 
-          hue:
+          let hue =
             if (delta == 0) {
               0
             } else if (cMax == normalizedRed) {
-              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
+              60 * Math.fmod(6, (normalizedGreen - normalizedBlue) / delta)
             } else if (cMax == normalizedBlue) {
               60 * ((normalizedRed - normalizedGreen / delta) + 4)
             } else {
@@ -738,43 +734,43 @@ module Color {
     case (color) {
       Color::RGBA(red, green, blue, alpha) =>
         {
-          normalizedRed:
-            Math.clamp(0, 255, red) / 255
+          let normalizedRed =
+            Math.clamp(red, 0, 255) / 255
 
-          normalizedBlue:
-            Math.clamp(0, 255, blue) / 255
+          let normalizedBlue =
+            Math.clamp(blue, 0, 255) / 255
 
-          normalizedGreen:
-            Math.clamp(0, 255, green) / 255
+          let normalizedGreen =
+            Math.clamp(green, 0, 255) / 255
 
-          cMax:
+          let cMax =
             normalizedRed
             |> Math.max(normalizedBlue)
             |> Math.max(normalizedGreen)
 
-          cMin:
+          let cMin =
             normalizedRed
             |> Math.min(normalizedBlue)
             |> Math.min(normalizedGreen)
 
-          delta:
+          let delta =
             cMax - cMin
 
-          value:
+          let value =
             cMax
 
-          saturation:
+          let saturation =
             if (cMax == 0) {
               0
             } else {
               delta / cMax
             }
 
-          hue:
+          let hue =
             if (delta == 0) {
               0
             } else if (cMax == normalizedRed) {
-              60 * Math.fmod((normalizedGreen - normalizedBlue) / delta, 6)
+              60 * Math.fmod(6, (normalizedGreen - normalizedBlue) / delta)
             } else if (cMax == normalizedBlue) {
               60 * ((normalizedRed - normalizedGreen / delta) + 4)
             } else {
@@ -822,34 +818,34 @@ module Color {
 
       Color::HSIA(hue, saturation, intensity, alpha) =>
         {
-          normalizedSaturation:
-            Math.clamp(0, 100, saturation) / 100
+          let normalizedSaturation =
+            Math.clamp(saturation, 0, 100) / 100
 
-          normalizedIntensity:
-            Math.clamp(0, 100, intensity) / 100
+          let normalizedIntensity =
+            Math.clamp(intensity, 0, 100) / 100
 
-          normalizedAlpha:
-            Math.clamp(0, 100, alpha)
+          let normalizedAlpha =
+            Math.clamp(alpha, 0, 100)
 
-          normalizedHue:
-            Math.clamp(0, 360, hue)
+          let normalizedHue =
+            Math.clamp(hue, 0, 360)
 
-          hTag:
+          let hTag =
             normalizedHue / 60
 
-          z:
-            1 - Math.abs(Math.fmod(hTag, 2) - 1)
+          let z =
+            1 - Math.abs(Math.fmod(2, hTag) - 1)
 
-          c:
+          let c =
             (3 * normalizedIntensity * normalizedSaturation) / (1 + z)
 
-          x:
+          let x =
             c * z
 
-          m:
+          let m =
             normalizedIntensity * (1 - normalizedSaturation)
 
-          {red, green, blue}:
+          let {red, green, blue} =
             if (0 <= hTag && hTag <= 1) {
               ({c, x, 0})
             } else if (1 < hTag && hTag <= 2) {
@@ -875,28 +871,28 @@ module Color {
 
       Color::HSLA(hue, saturation, lightness, alpha) =>
         {
-          normalizedSaturation:
-            Math.clamp(0, 100, saturation) / 100
+          let normalizedSaturation =
+            Math.clamp(saturation, 0, 100) / 100
 
-          normalizedLightness:
-            Math.clamp(0, 100, lightness) / 100
+          let normalizedLightness =
+            Math.clamp(lightness, 0, 100) / 100
 
-          normalizedAlpha:
-            Math.clamp(0, 100, alpha)
+          let normalizedAlpha =
+            Math.clamp(alpha, 0, 100)
 
-          normalizedHue:
-            Math.clamp(0, 360, hue)
+          let normalizedHue =
+            Math.clamp(hue, 0, 360)
 
-          c:
+          let c =
             (1 - Math.abs(2 * normalizedLightness - 1)) * normalizedSaturation
 
-          x:
-            c * (1 - Math.abs(Math.fmod(normalizedHue / 60, 2) - 1))
+          let x =
+            c * (1 - Math.abs(Math.fmod(2, normalizedHue / 60) - 1))
 
-          m:
+          let m =
             normalizedLightness - c / 2
 
-          {red, green, blue}:
+          let {red, green, blue} =
             if (0 <= normalizedHue && normalizedHue < 60) {
               ({c, x, 0})
             } else if (60 <= normalizedHue && normalizedHue < 120) {
@@ -920,28 +916,28 @@ module Color {
 
       Color::HSVA(hue, saturation, value, alpha) =>
         {
-          normalizedSaturation:
-            Math.clamp(0, 100, saturation) / 100
+          let normalizedSaturation =
+            Math.clamp(saturation, 0, 100) / 100
 
-          noramlizedValue:
-            Math.clamp(0, 100, value) / 100
+          let noramlizedValue =
+            Math.clamp(value, 0, 100) / 100
 
-          normalizedAlpha:
-            Math.clamp(0, 100, alpha)
+          let normalizedAlpha =
+            Math.clamp(alpha, 0, 100)
 
-          normalizedHue:
-            Math.clamp(0, 360, hue)
+          let normalizedHue =
+            Math.clamp(hue, 0, 360)
 
-          c:
+          let c =
             noramlizedValue * normalizedSaturation
 
-          x:
-            c * (1 - Math.abs(Math.fmod(normalizedHue / 60, 2) - 1))
+          let x =
+            c * (1 - Math.abs(Math.fmod(2, normalizedHue / 60) - 1))
 
-          m:
+          let m =
             noramlizedValue - c
 
-          {red, green, blue}:
+          let {red, green, blue} =
             if (0 <= normalizedHue && normalizedHue < 60) {
               ({c, x, 0})
             } else if (60 <= normalizedHue && normalizedHue < 120) {
@@ -1000,7 +996,7 @@ module Color {
 
   /* Returns the CSS Percent RGBA representation of the color. */
   fun toCSSRGBAPercent (color : Color) : String {
-    {red, green, blue, alpha}:
+    let {red, green, blue, alpha} =
       toRGBAPercentTuple(color)
 
     "rgba(#{red}%, #{green}%, #{blue}%, #{alpha}%)"

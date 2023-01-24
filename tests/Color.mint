@@ -227,7 +227,7 @@ suite "Color.readableTextColor" {
 
 suite "Color.toHSIA" {
   test "it converts correctly" {
-    tests:
+    let tests =
       [
         {Color::RGBA(255, 255, 255, 100), Color::HSIA(0, 0, 100, 100)},
         {Color::RGBA(128, 128, 128, 100), Color::HSIA(0, 0, 50, 100)},
@@ -241,22 +241,22 @@ suite "Color.toHSIA" {
         {Color::RGBA(161, 163, 36, 100), Color::HSIA(61, 70, 47, 100)}
       ]
 
-    expected:
+    let expected =
       for (item of tests) {
         item[1]
       }
 
-    expected1:
+    let expected1 =
       for (item of tests) {
         item[0]
       }
 
-    actual:
+    let actual =
       for (item of tests) {
         Color.toHSIA(item[0])
       }
 
-    actual1:
+    let actual1 =
       for (item of tests) {
         Color.toRGBA(item[1])
       }
