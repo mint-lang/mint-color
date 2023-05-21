@@ -1,7 +1,9 @@
+/* A module for creating color wheels. */
 module ColorWheel {
+  /* Adjusts the HUE value. */
   fun adjustHue (value : Number) : Number {
     let newValue =
-      if (value < 0) {
+      if value < 0 {
         value + Math.ceil(-value / 360) * 360
       } else {
         value
@@ -10,6 +12,7 @@ module ColorWheel {
     newValue % 360
   }
 
+  /* Returns the complementary color wheel of the color. */
   fun complementary (color : Color) : Array(Color) {
     [
       color,
@@ -17,6 +20,7 @@ module ColorWheel {
     ]
   }
 
+  /* Returns the split-complementary color wheel of the color. */
   fun splitComplementary (color : Color) : Array(Color) {
     let hue =
       Color.getHue(color)
@@ -29,6 +33,7 @@ module ColorWheel {
     ]
   }
 
+  /* Returns the analogous color wheel of the color. */
   fun analogous (color : Color) : Array(Color) {
     let hue =
       Color.getHue(color)
@@ -44,6 +49,7 @@ module ColorWheel {
     ]
   }
 
+  /* Returns the triadic color wheel of the color. */
   fun triadic (color : Color) : Array(Color) {
     let hue =
       Color.getHue(color)
@@ -55,6 +61,7 @@ module ColorWheel {
     ]
   }
 
+  /* Returns the tetradic color wheel of the color. */
   fun tetradic (color : Color) : Array(Color) {
     let hue =
       Color.getHue(color)
@@ -67,6 +74,7 @@ module ColorWheel {
     ]
   }
 
+  /* Returns the monochromatic color wheel of the color. */
   fun monochromatic (color : Color) : Array(Color) {
     [
       Color.setValue(color, 100),

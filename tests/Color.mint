@@ -242,22 +242,22 @@ suite "Color.toHSIA" {
       ]
 
     let expected =
-      for (item of tests) {
+      for item of tests {
         item[1]
       }
 
     let expected1 =
-      for (item of tests) {
+      for item of tests {
         item[0]
       }
 
     let actual =
-      for (item of tests) {
+      for item of tests {
         Color.toHSIA(item[0])
       }
 
     let actual1 =
-      for (item of tests) {
+      for item of tests {
         Color.toRGBA(item[1])
       }
 
