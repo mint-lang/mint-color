@@ -14,10 +14,7 @@ module ColorWheel {
 
   // Returns the complementary color wheel of the color.
   fun complementary (color : Color) : Array(Color) {
-    [
-      color,
-      Color.setHue(color, adjustHue(Color.getHue(color) + 180))
-    ]
+    [color, Color.setHue(color, adjustHue(Color.getHue(color) + 180))]
   }
 
   // Returns the split-complementary color wheel of the color.

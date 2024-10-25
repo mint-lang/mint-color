@@ -103,7 +103,8 @@ module Color {
             let blue =
               splitted[2] or ""
 
-            Maybe.Just(Color.HEX("#{red}#{red}#{green}#{green}#{blue}#{blue}FF"))
+            Maybe.Just(
+              Color.HEX("#{red}#{red}#{green}#{green}#{blue}#{blue}FF"))
           }
 
         6 => Maybe.Just(Color.HEX(normalized + "FF"))
@@ -122,11 +123,8 @@ module Color {
     value : Number,
     alpha : Number
   ) : Color {
-    Color.HSVA(
-      Math.clamp(hue, 0, 360),
-      Math.clamp(saturation, 0, 100),
-      Math.clamp(value, 0, 100),
-      Math.clamp(alpha, 0, 100))
+    Color.HSVA(Math.clamp(hue, 0, 360), Math.clamp(saturation, 0, 100),
+      Math.clamp(value, 0, 100), Math.clamp(alpha, 0, 100))
   }
 
   // Creates a color from red, green, blue and alpha parts.
@@ -138,11 +136,8 @@ module Color {
     blue : Number,
     alpha : Number
   ) : Color {
-    Color.RGBA(
-      Math.clamp(red, 0, 255),
-      Math.clamp(green, 0, 255),
-      Math.clamp(blue, 0, 255),
-      Math.clamp(alpha, 0, 100))
+    Color.RGBA(Math.clamp(red, 0, 255), Math.clamp(green, 0, 255),
+      Math.clamp(blue, 0, 255), Math.clamp(alpha, 0, 100))
   }
 
   // Returns the alpha value of the color.
@@ -185,8 +180,7 @@ module Color {
   //   Color.getSaturation(Color.fromHSVA(0,100,100,50)) == 100
   fun getSaturation (color : Color) : Number {
     case color {
-      HSVA(hue, saturation) =>
-        saturation
+      HSVA(hue, saturation) => saturation
 
       =>
         color
@@ -372,7 +366,8 @@ module Color {
   //   Color.setLightness(50, color) == Color.fromHSLA(0, 100, 50, 100)
   fun setLightness (color : Color, lightness : Number) : Color {
     if let HSLA(hue, saturation, oldLightness, alpha) = color {
-      Color.HSLA(hue, saturation, Math.round(Math.clamp(lightness, 0, 100)), alpha)
+      Color.HSLA(hue, saturation, Math.round(Math.clamp(lightness, 0, 100)),
+        alpha)
     } else {
       setValue(toHSLA(color), lightness)
     }
@@ -473,7 +468,8 @@ module Color {
           let alphaPart =
             `#{Math.round(alpha * 2.55)}.toString(16).padStart(2,'0')`
 
-          Color.HEX(String.toUpperCase("#{redPart}#{greenPart}#{bluePart}#{alphaPart}"))
+          Color.HEX(
+            String.toUpperCase("#{redPart}#{greenPart}#{bluePart}#{alphaPart}"))
         }
 
       HEX => color
@@ -503,18 +499,13 @@ module Color {
           let intensity =
             (normalizedRed + normalizedGreen + normalizedBlue) / 3
 
-          if normalizedRed == normalizedGreen &&
-              normalizedGreen == normalizedBlue {
-            Color.HSIA(
-              Math.round(0),
-              Math.round(0),
-              Math.round(intensity * 100),
-              Math.round(alpha))
+          if normalizedRed == normalizedGreen && normalizedGreen == normalizedBlue {
+            Color.HSIA(Math.round(0), Math.round(0),
+              Math.round(intensity * 100), Math.round(alpha))
           } else {
             let w =
               (normalizedRed - normalizedGreen + normalizedRed - normalizedBlue) / Math.sqrt(
-                (normalizedRed - normalizedGreen) * (normalizedRed - normalizedGreen) +
-                  (normalizedRed - normalizedBlue) * (normalizedGreen - normalizedBlue)) / 2
+                (normalizedRed - normalizedGreen) * (normalizedRed - normalizedGreen) + (normalizedRed - normalizedBlue) * (normalizedGreen - normalizedBlue)) / 2
 
             let hueBase =
               Math.acos(w) * 180 / Math.PI
@@ -530,14 +521,12 @@ module Color {
               if intensity == 0 {
                 0
               } else {
-                1 - ((Array.min([normalizedRed, normalizedGreen, normalizedBlue]) or 0) / intensity)
+                1 - ((Array.min(
+                  [normalizedRed, normalizedGreen, normalizedBlue]) or 0) / intensity)
               }
 
-            Color.HSIA(
-              Math.round(hue),
-              Math.round(saturation * 100),
-              Math.round(intensity * 100),
-              Math.round(alpha))
+            Color.HSIA(Math.round(hue), Math.round(saturation * 100),
+              Math.round(intensity * 100), Math.round(alpha))
           }
         }
 
@@ -599,11 +588,8 @@ module Color {
               60 * ((normalizedBlue - normalizedRed / delta) + 2)
             }
 
-          Color.HSLA(
-            Math.round(hue),
-            Math.round(saturation * 100),
-            Math.round(lightness * 100),
-            Math.round(alpha))
+          Color.HSLA(Math.round(hue), Math.round(saturation * 100),
+            Math.round(lightness * 100), Math.round(alpha))
         }
 
       HSLA => color
@@ -678,11 +664,8 @@ module Color {
               60 * ((normalizedBlue - normalizedRed / delta) + 2)
             }
 
-          Color.HSVA(
-            Math.round(hue),
-            Math.round(saturation * 100),
-            Math.round(value * 100),
-            Math.round(alpha))
+          Color.HSVA(Math.round(hue), Math.round(saturation * 100),
+            Math.round(value * 100), Math.round(alpha))
         }
 
       HSVA => color
@@ -757,11 +740,9 @@ module Color {
               ({0, 0, 0})
             }
 
-          Color.RGBA(
-            Math.round((red + m) * 255),
-            Math.round((green + m) * 255),
-            Math.round((blue + m) * 255),
-            normalizedAlpha)
+          Color.RGBA(Math.round((red + m) * 255),
+            Math.round((green + m) * 255), Math.round((blue + m) * 255),
+              normalizedAlpha)
         }
 
       HSLA(hue, saturation, lightness, alpha) =>
@@ -802,11 +783,8 @@ module Color {
               ({c, 0, x})
             }
 
-          Color.RGBA(
-            Math.ceil((red + m) * 255),
-            Math.ceil((green + m) * 255),
-            Math.ceil((blue + m) * 255),
-            normalizedAlpha)
+          Color.RGBA(Math.ceil((red + m) * 255), Math.ceil((green + m) * 255),
+            Math.ceil((blue + m) * 255), normalizedAlpha)
         }
 
       HSVA(hue, saturation, value, alpha) =>
@@ -847,11 +825,8 @@ module Color {
               ({c, 0, x})
             }
 
-          Color.RGBA(
-            Math.ceil((red + m) * 255),
-            Math.ceil((green + m) * 255),
-            Math.ceil((blue + m) * 255),
-            normalizedAlpha)
+          Color.RGBA(Math.ceil((red + m) * 255), Math.ceil((green + m) * 255),
+            Math.ceil((blue + m) * 255), normalizedAlpha)
         }
     }
   }
