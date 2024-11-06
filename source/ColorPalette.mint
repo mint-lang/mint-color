@@ -39,7 +39,7 @@ module ColorPalette {
     background : Color,
     backgroundInverse : Color
   ) : ColorPalette {
-    let {hue, saturation, lightness} =
+    let {hue, saturation, lightness, _} =
       Color.toHSLATuple(color)
 
     let s50 =
