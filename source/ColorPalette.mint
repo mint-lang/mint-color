@@ -1,14 +1,12 @@
-/*
-A shade for an item in a color palette. This consist of a color and a
-readable text color of the color.
-*/
-record ColorPalette.Shade {
+// A shade for an item in a color palette. This consist of a color and a
+// readable text color of the color.
+type ColorPalette.Shade {
   color : String,
   text : String
 }
 
-/* A color palette for a color. */
-record ColorPalette {
+// A color palette for a color.
+type ColorPalette {
   s900 : ColorPalette.Shade,
   s800 : ColorPalette.Shade,
   s700 : ColorPalette.Shade,
@@ -24,12 +22,10 @@ record ColorPalette {
   hue : Number
 }
 
-/* Functions for creating a color palette. */
+// Functions for creating a color palette.
 module ColorPalette {
-  /*
-  Returns a `ColorPalette.Shade` from a color, by calulating the
-  readable text color for that color.
-  */
+  // Returns a `ColorPalette.Shade` from a color, by calulating the
+  // readable text color for that color.
   fun shadeFromColor (color : Color) : ColorPalette.Shade {
     {
       text: Color.toCSSRGBA(Color.readableTextColor(color)),
@@ -37,7 +33,7 @@ module ColorPalette {
     }
   }
 
-  /* Creates a color palette from the given color. */
+  // Creates a color palette from the given color.
   fun fromColor (
     color : Color,
     background : Color,
