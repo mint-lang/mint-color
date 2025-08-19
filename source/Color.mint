@@ -280,7 +280,7 @@ module Color {
         color += letters[Math.floor(Math.random() * 16)];
       }
 
-      return #{Color.fromHEX(`color`) or Color::HEX("000000")};
+      return #{Color.fromHEX(`color`) or Color.HEX("000000")};
     })()
     `
   }
@@ -690,7 +690,7 @@ module Color {
           const green = parseInt(#{value}.slice(2,4), 16) || 0
           const blue = parseInt(#{value}.slice(4,6), 16) || 0
           const red = parseInt(#{value}.slice(0,2), 16) || 0
-          return #{Color::RGBA(`red`, `green`, `blue`, `alpha / 255 * 100`)}
+          return #{Color.RGBA(`red`, `green`, `blue`, `alpha / 255 * 100`)}
         })()
         `
 

@@ -12,12 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Setup Mint
-      uses: fabasoad/setup-mint-action@v1.0.15
-      with:
-        version: 0.20.0
+      - name: Install tools from asdf config
+        uses: ai/asdf-cache-action@v1
 
-    - name: Run script
-      run: mint test
+      - name: Run script
+        run: mint test
