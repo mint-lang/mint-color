@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Install tools from asdf config
-        uses: ai/asdf-cache-action@v1
+        uses: asdf-vm/actions/install@v4
 
       - name: Run script
         run: mint test -b firefox
